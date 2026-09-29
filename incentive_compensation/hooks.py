@@ -138,13 +138,18 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+    "Sales Invoice": {
+        "on_submit": "incentive_compensation.incentive_compensation.commission_engine.commission_events.on_sales_invoice_submit",
+        "on_cancel": "incentive_compensation.incentive_compensation.commission_engine.commission_events.on_sales_invoice_cancel",
+    },
+    "Commission Statement": {
+        "validate": "incentive_compensation.incentive_compensation.commission_engine.commission_events.validate_commission_statement",
+    },
+    "Commission Payout": {
+        "validate": "incentive_compensation.incentive_compensation.commission_engine.commission_events.validate_commission_payout",
+    },
+}
 
 # Scheduled Tasks
 # ---------------
@@ -255,4 +260,3 @@ app_license = "mit"
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
-

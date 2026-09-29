@@ -1,0 +1,229 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "CL-.YYYY.-.#####",
+ "creation": "2026-09-20 19:10:58.828729",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "source_transaction_section",
+  "sales_invoice",
+  "source_key",
+  "entry_type",
+  "column_break_mkbq",
+  "sales_invoice_item",
+  "reversal_of",
+  "commission_section",
+  "commission_payee",
+  "commission_plan",
+  "currency",
+  "column_break_bdbg",
+  "commission_rule",
+  "company",
+  "calculation_section",
+  "calculation_method",
+  "rate",
+  "commission_amount",
+  "column_break_vaat",
+  "base_amount",
+  "fixed_amount",
+  "status_section",
+  "status",
+  "dates_section",
+  "transaction_date",
+  "column_break_xbmn",
+  "calculation_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "source_transaction_section",
+   "fieldtype": "Section Break",
+   "label": "Source Transaction"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_mkbq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "commission_section",
+   "fieldtype": "Section Break",
+   "label": "Commission"
+  },
+  {
+   "fieldname": "commission_payee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Commission Payee",
+   "options": "Commission Payee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "commission_rule",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Commission Rule",
+   "options": "Commission Rule",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_bdbg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "commission_plan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Commission Plan",
+   "options": "Commission Plan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "calculation_section",
+   "fieldtype": "Section Break",
+   "label": "Calculation"
+  },
+  {
+   "fieldname": "calculation_method",
+   "fieldtype": "Select",
+   "label": "Calculation Method",
+   "options": "Percentage\nFixed Amount\nTiered",
+   "reqd": 1
+  },
+  {
+   "fieldname": "base_amount",
+   "fieldtype": "Currency",
+   "label": "Base Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Percent",
+   "label": "Rate"
+  },
+  {
+   "fieldname": "fixed_amount",
+   "fieldtype": "Currency",
+   "label": "Fixed Amount"
+  },
+  {
+   "fieldname": "commission_amount",
+   "fieldtype": "Currency",
+   "label": "Commission Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_vaat",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Calculated\nUnder Review\nApproved\nPosted\nReversed\nCancelled",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dates_section",
+   "fieldtype": "Section Break",
+   "label": "Dates"
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "label": "Transaction Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_xbmn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "calculation_date",
+   "fieldtype": "Datetime",
+   "label": "Calculation Date"
+  },
+  {
+   "fieldname": "sales_invoice_item",
+   "fieldtype": "Data",
+   "label": "Sales Invoice Item"
+  },
+  {
+   "fieldname": "source_key",
+   "fieldtype": "Data",
+   "label": "Source Key",
+   "read_only": 1,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "reversal_of",
+   "fieldtype": "Link",
+   "label": "Reversal Of",
+   "options": "Commission Ledger"
+  },
+  {
+   "default": "Commission",
+   "fieldname": "entry_type",
+   "fieldtype": "Select",
+   "label": "Entry Type",
+   "options": "Commission\nReversal\nAdjustment"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-09-25 14:41:13.626729",
+ "modified_by": "Administrator",
+ "module": "Incentive Compensation",
+ "name": "Commission Ledger",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

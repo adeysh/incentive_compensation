@@ -1,0 +1,198 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "field:rule_name",
+ "creation": "2026-09-20 16:46:54.470378",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "status_section",
+  "enabled",
+  "details_section",
+  "rule_name",
+  "column_break_lgak",
+  "commission_plan",
+  "section_break_ubso",
+  "priority",
+  "conditions_section",
+  "based_on",
+  "item",
+  "item_group",
+  "sales_person",
+  "customer",
+  "customer_group",
+  "territory",
+  "calculation_section",
+  "calculation_method",
+  "fixed_amount",
+  "column_break_phjh",
+  "rate",
+  "section_break_opxc",
+  "tiers"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "rule_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Rule Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_lgak",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "commission_plan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Commission Plan",
+   "options": "Commission Plan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "conditions_section",
+   "fieldtype": "Section Break",
+   "label": "Conditions"
+  },
+  {
+   "fieldname": "based_on",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Based On",
+   "options": "Item\nItem Group\nSales Person\nCustomer\nCustomer Group\nTerritory",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory"
+  },
+  {
+   "fieldname": "calculation_section",
+   "fieldtype": "Section Break",
+   "label": "Calculation"
+  },
+  {
+   "fieldname": "calculation_method",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Calculation Method",
+   "options": "Percentage\nFixed Amount\nTiered",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Percent",
+   "label": "Rate"
+  },
+  {
+   "fieldname": "fixed_amount",
+   "fieldtype": "Currency",
+   "label": "Fixed Amount"
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "column_break_phjh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_opxc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tiers",
+   "fieldtype": "Table",
+   "label": "Tiers",
+   "options": "Commission Tier"
+  },
+  {
+   "fieldname": "section_break_ubso",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "100",
+   "fieldname": "priority",
+   "fieldtype": "Int",
+   "label": "Priority",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-09-22 12:22:18.943782",
+ "modified_by": "Administrator",
+ "module": "Incentive Compensation",
+ "name": "Commission Rule",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

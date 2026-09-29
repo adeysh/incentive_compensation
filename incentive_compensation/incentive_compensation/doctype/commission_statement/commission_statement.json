@@ -1,0 +1,162 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "CS-.YYYY.-.#####",
+ "creation": "2026-09-20 20:20:16.543822",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_section",
+  "commission_payee",
+  "company",
+  "column_break_ikde",
+  "currency",
+  "period_section",
+  "from_date",
+  "column_break_ouis",
+  "to_date",
+  "commission_section",
+  "gross_commission",
+  "net_commission",
+  "column_break_exhe",
+  "adjustments",
+  "status_section",
+  "status",
+  "ledger_entries_section",
+  "ledger_entries"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "commission_payee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Commission Payee",
+   "options": "Commission Payee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ikde",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "period_section",
+   "fieldtype": "Section Break",
+   "label": "Period"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ouis",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "commission_section",
+   "fieldtype": "Section Break",
+   "label": "Commission"
+  },
+  {
+   "fieldname": "gross_commission",
+   "fieldtype": "Currency",
+   "label": "Gross Commission"
+  },
+  {
+   "fieldname": "net_commission",
+   "fieldtype": "Currency",
+   "label": "Net Commission"
+  },
+  {
+   "fieldname": "column_break_exhe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "adjustments",
+   "fieldtype": "Currency",
+   "label": "Adjustments"
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nGenerated\nUnder Review\nApproved\nPosted\nPaid\nCancelled",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ledger_entries_section",
+   "fieldtype": "Section Break",
+   "label": "Ledger Entries"
+  },
+  {
+   "fieldname": "ledger_entries",
+   "fieldtype": "Table",
+   "label": "Ledger Entries",
+   "options": "Commission Statement Entry",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-09-26 18:10:22.603929",
+ "modified_by": "Administrator",
+ "module": "Incentive Compensation",
+ "name": "Commission Statement",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
