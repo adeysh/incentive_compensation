@@ -24,6 +24,10 @@ from incentive_compensation.incentive_compensation.commission_engine.statement_w
     cancel_statement,
 )
 
+from incentive_compensation.incentive_compensation.commission_engine.ledger import (
+    reverse_ledger_entry,
+)
+
 
 class TestCommissionEndToEnd(IntegrationTestCase):
 
@@ -668,7 +672,7 @@ class TestCommissionEndToEnd(IntegrationTestCase):
             qty=1,
             rate=1000,
             currency=self.currency,
-            posting_date="2026-09-28",
+            posting_date="2026-09-27",
             parent_cost_center=self.cost_center,
             cost_center=self.cost_center,
             income_account=self.income_account,
@@ -1661,4 +1665,789 @@ class TestCommissionEndToEnd(IntegrationTestCase):
         self.assertEqual(
             second_statement.ledger_entries[0].commission_ledger,
             ledger_name,
+        )
+
+    def test_commission_ledger_calculation_fields_are_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        ledger_entries = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": invoice.name,
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(ledger_entries), 1)
+
+        ledger = frappe.get_doc(
+            "Commission Ledger",
+            ledger_entries[0].name,
+        )
+
+        original_amount = ledger.commission_amount
+        original_rate = ledger.rate
+        original_base_amount = ledger.base_amount
+
+        ledger.commission_amount = 9999
+        ledger.rate = 99
+        ledger.base_amount = 999999
+
+        with self.assertRaises(frappe.ValidationError):
+            ledger.save()
+
+        ledger.reload()
+
+        self.assertEqual(
+            ledger.commission_amount,
+            original_amount,
+        )
+        self.assertEqual(
+            ledger.rate,
+            original_rate,
+        )
+        self.assertEqual(
+            ledger.base_amount,
+            original_base_amount,
+        )
+
+    def test_commission_ledger_rule_identity_fields_are_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        ledger_entries = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": invoice.name,
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(ledger_entries), 1)
+
+        ledger = frappe.get_doc(
+            "Commission Ledger",
+            ledger_entries[0].name,
+        )
+
+        original_values = {
+            "commission_rule": ledger.commission_rule,
+            "commission_plan": ledger.commission_plan,
+            "commission_payee": ledger.commission_payee,
+        }
+
+        ledger.commission_rule = self.high_priority_rule.name
+        ledger.commission_plan = self.newer_plan.name
+        ledger.commission_payee = self.allocation_payee.name
+
+        with self.assertRaises(frappe.ValidationError):
+            ledger.save()
+
+        ledger.reload()
+
+        for field, original_value in original_values.items():
+            self.assertEqual(
+                ledger.get(field),
+                original_value,
+            )
+
+    def test_commission_ledger_transaction_date_is_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        ledger_entries = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": invoice.name,
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(ledger_entries), 1)
+
+        ledger = frappe.get_doc(
+            "Commission Ledger",
+            ledger_entries[0].name,
+        )
+
+        original_transaction_date = ledger.transaction_date
+
+        ledger.transaction_date = "2000-01-01"
+
+        with self.assertRaises(frappe.ValidationError):
+            ledger.save()
+
+        ledger.reload()
+
+        self.assertEqual(
+            ledger.transaction_date,
+            original_transaction_date,
+        )
+
+    def test_commission_ledger_calculation_context_is_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        ledger_entries = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": invoice.name,
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(ledger_entries), 1)
+
+        ledger = frappe.get_doc(
+            "Commission Ledger",
+            ledger_entries[0].name,
+        )
+
+        original_values = {
+            "calculation_method": ledger.calculation_method,
+            "fixed_amount": ledger.fixed_amount,
+            "currency": ledger.currency,
+            "company": ledger.company,
+        }
+
+        ledger.calculation_method = "Fixed Amount"
+        ledger.fixed_amount = 500
+        ledger.currency = "USD"
+        ledger.company = "Incentive Test Company"
+
+        with self.assertRaises(frappe.ValidationError):
+            ledger.save()
+
+        ledger.reload()
+
+        for field, original_value in original_values.items():
+            self.assertEqual(
+                ledger.get(field),
+                original_value,
+            )
+
+    def test_commission_ledger_sales_invoice_item_is_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        ledger_entries = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": invoice.name,
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(ledger_entries), 1)
+
+        ledger = frappe.get_doc(
+            "Commission Ledger",
+            ledger_entries[0].name,
+        )
+
+        original_sales_invoice_item = ledger.sales_invoice_item
+
+        ledger.sales_invoice_item = "FAKE-SALES-INVOICE-ITEM"
+
+        with self.assertRaises(frappe.ValidationError):
+            ledger.save()
+
+        ledger.reload()
+
+        self.assertEqual(
+            ledger.sales_invoice_item,
+            original_sales_invoice_item,
+        )
+
+    def test_commission_ledger_sales_invoice_is_immutable(self):
+        first_invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        first_invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        first_invoice.submit()
+
+        second_invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=2000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        second_invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        second_invoice.submit()
+
+        ledger_entries = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": first_invoice.name,
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(ledger_entries), 1)
+
+        ledger = frappe.get_doc(
+            "Commission Ledger",
+            ledger_entries[0].name,
+        )
+
+        original_sales_invoice = ledger.sales_invoice
+
+        ledger.sales_invoice = second_invoice.name
+
+        with self.assertRaises(frappe.ValidationError):
+            ledger.save()
+
+        ledger.reload()
+
+        self.assertEqual(
+            ledger.sales_invoice,
+            original_sales_invoice,
+        )
+
+    def test_commission_ledger_source_key_is_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        ledger_entries = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": invoice.name,
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(ledger_entries), 1)
+
+        ledger = frappe.get_doc(
+            "Commission Ledger",
+            ledger_entries[0].name,
+        )
+
+        original_source_key = ledger.source_key
+
+        ledger.source_key = "FAKE-SOURCE-KEY"
+
+        with self.assertRaises(frappe.ValidationError):
+            ledger.save()
+
+        ledger.reload()
+
+        self.assertEqual(
+            ledger.source_key,
+            original_source_key,
+        )
+
+    def test_commission_ledger_calculation_date_is_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        ledger_entries = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": invoice.name,
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(ledger_entries), 1)
+
+        ledger = frappe.get_doc(
+            "Commission Ledger",
+            ledger_entries[0].name,
+        )
+
+        original_calculation_date = ledger.calculation_date
+
+        ledger.calculation_date = "2000-01-01 00:00:00"
+
+        with self.assertRaises(frappe.ValidationError):
+            ledger.save()
+
+        ledger.reload()
+
+        self.assertEqual(
+            ledger.calculation_date,
+            original_calculation_date,
+        )
+
+    def test_commission_ledger_entry_type_is_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        ledger_entries = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": invoice.name,
+                "entry_type": "Commission",
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(ledger_entries), 1)
+
+        ledger = frappe.get_doc(
+            "Commission Ledger",
+            ledger_entries[0].name,
+        )
+
+        original_entry_type = ledger.entry_type
+
+        ledger.entry_type = "Adjustment"
+
+        with self.assertRaises(frappe.ValidationError):
+            ledger.save()
+
+        ledger.reload()
+
+        self.assertEqual(
+            ledger.entry_type,
+            original_entry_type,
+        )
+
+    def test_commission_ledger_reversal_of_is_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        ledger_entries = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": invoice.name,
+                "entry_type": "Commission",
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(ledger_entries), 1)
+
+        original_ledger = frappe.get_doc(
+            "Commission Ledger",
+            ledger_entries[0].name,
+        )
+
+        reversal = reverse_ledger_entry(original_ledger)
+
+        self.assertEqual(
+            reversal.entry_type,
+            "Reversal",
+        )
+
+        self.assertEqual(
+            reversal.reversal_of,
+            original_ledger.name,
+        )
+
+        second_invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        second_invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        second_invoice.submit()
+
+        second_ledgers = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": second_invoice.name,
+                "entry_type": "Commission",
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(second_ledgers), 1)
+
+        second_ledger = frappe.get_doc(
+            "Commission Ledger",
+            second_ledgers[0].name,
+        )
+
+        # Reload so the test starts from the exact database state.
+        reversal.reload()
+
+        self.assertEqual(
+            reversal.reversal_of,
+            original_ledger.name,
+        )
+
+        # Change only reversal_of.
+        reversal.reversal_of = second_ledger.name
+
+        # This should fail once reversal_of is protected.
+        with self.assertRaises(frappe.ValidationError):
+            reversal.save()
+
+        # The database value must remain unchanged.
+        reversal.reload()
+
+        self.assertEqual(
+            reversal.reversal_of,
+            original_ledger.name,
+        )
+
+    def test_commission_ledger_cannot_be_deleted(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        ledger_entries = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": invoice.name,
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(ledger_entries), 1)
+
+        ledger = frappe.get_doc(
+            "Commission Ledger",
+            ledger_entries[0].name,
+        )
+
+        ledger_name = ledger.name
+
+        with self.assertRaises(frappe.ValidationError):
+            ledger.delete()
+
+        self.assertTrue(
+            frappe.db.exists(
+                "Commission Ledger",
+                ledger_name,
+            )
+        )
+
+    def test_commission_ledger_cannot_be_renamed(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        ledger_entries = frappe.get_all(
+            "Commission Ledger",
+            filters={
+                "sales_invoice": invoice.name,
+            },
+            fields=["name"],
+        )
+
+        self.assertEqual(len(ledger_entries), 1)
+
+        ledger = frappe.get_doc(
+            "Commission Ledger",
+            ledger_entries[0].name,
+        )
+
+        original_name = ledger.name
+        new_name = f"{original_name}-RENAMED"
+
+        with self.assertRaises(frappe.ValidationError):
+            frappe.rename_doc(
+                "Commission Ledger",
+                original_name,
+                new_name,
+            )
+
+        self.assertTrue(
+            frappe.db.exists(
+                "Commission Ledger",
+                original_name,
+            )
+        )
+
+        self.assertFalse(
+            frappe.db.exists(
+                "Commission Ledger",
+                new_name,
+            )
         )
