@@ -1667,6 +1667,329 @@ class TestCommissionEndToEnd(IntegrationTestCase):
             ledger_name,
         )
 
+    def test_commission_statement_financial_fields_are_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date="2026-09-28",
+            to_date="2026-09-28",
+        )
+
+        original_values = {
+            "gross_commission": statement.gross_commission,
+            "adjustments": statement.adjustments,
+            "net_commission": statement.net_commission,
+        }
+
+        statement.net_commission = 9999
+        statement.gross_commission = 9999
+        statement.adjustments = 9999
+
+        with self.assertRaises(frappe.ValidationError):
+            statement.save()
+
+        statement.reload()
+
+        for field, original_value in original_values.items():
+            self.assertEqual(
+                statement.get(field),
+                original_value,
+            )
+
+    def test_commission_statement_identity_fields_are_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date="2026-09-28",
+            to_date="2026-09-28",
+        )
+
+        original_values = {
+            "commission_payee": statement.commission_payee,
+            "company": statement.company,
+            "currency": statement.currency,
+            "from_date": statement.from_date,
+            "to_date": statement.to_date,
+        }
+
+        statement.commission_payee = self.allocation_payee.name
+        statement.company = "Wind Power LLC"
+        statement.currency = "USD"
+        statement.from_date = "2026-09-01"
+        statement.to_date = "2026-09-30"
+
+        with self.assertRaises(frappe.ValidationError):
+            statement.save()
+
+        statement.reload()
+
+        for field, original_value in original_values.items():
+            actual_value = statement.get(field)
+
+            if field in ("from_date", "to_date"):
+                actual_value = getdate(actual_value)
+                original_value = getdate(original_value)
+
+            self.assertEqual(
+                actual_value,
+                original_value,
+            )
+
+    def test_commission_statement_generation_date_is_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date="2026-09-28",
+            to_date="2026-09-28",
+        )
+
+        self.assertIsNotNone(statement.generation_date)
+
+        original_generation_date = statement.generation_date
+
+        statement.generation_date = "2000-01-01 00:00:00"
+
+        with self.assertRaises(frappe.ValidationError):
+            statement.save()
+
+        statement.reload()
+
+        self.assertEqual(
+            statement.generation_date,
+            original_generation_date,
+        )
+
+    def test_commission_statement_ledger_entries_are_immutable(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.priority_item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date="2026-09-28",
+            to_date="2026-09-28",
+        )
+
+        self.assertEqual(len(statement.ledger_entries), 1)
+
+        original_entry = statement.ledger_entries[0]
+
+        statement.reload()
+
+        statement.ledger_entries[0].commission_amount = 999999
+
+        with self.assertRaises(frappe.ValidationError):
+            statement.save()
+
+        statement.reload()
+
+        self.assertEqual(
+            statement.ledger_entries[0].commission_amount,
+            original_entry.commission_amount,
+        )
+
+    def test_commission_statement_ledger_entries_cannot_be_deleted(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.priority_item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date="2026-09-28",
+            to_date="2026-09-28",
+        )
+
+        self.assertEqual(len(statement.ledger_entries), 1)
+
+        statement.ledger_entries.pop()
+
+        with self.assertRaises(frappe.ValidationError):
+            statement.save()
+
+        statement.reload()
+
+        self.assertEqual(len(statement.ledger_entries), 1)
+
+    def test_commission_statement_ledger_entries_cannot_be_added(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.priority_item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date="2026-09-28",
+            to_date="2026-09-28",
+        )
+
+        self.assertEqual(len(statement.ledger_entries), 1)
+
+        statement.append(
+            "ledger_entries",
+            {
+                "commission_ledger": statement.ledger_entries[0].commission_ledger,
+                "transaction_date": statement.ledger_entries[0].transaction_date,
+                "entry_type": statement.ledger_entries[0].entry_type,
+                "sales_invoice": statement.ledger_entries[0].sales_invoice,
+                "commission_amount": statement.ledger_entries[0].commission_amount,
+            },
+        )
+
+        self.assertEqual(len(statement.ledger_entries), 2)
+
+        with self.assertRaises(frappe.ValidationError):
+            statement.save()
+
+        statement.reload()
+
+        self.assertEqual(len(statement.ledger_entries), 1)
+
     def test_commission_ledger_calculation_fields_are_immutable(self):
         invoice = create_sales_invoice(
             company=self.company,

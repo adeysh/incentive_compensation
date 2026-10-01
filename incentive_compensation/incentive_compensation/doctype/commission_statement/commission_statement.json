@@ -23,6 +23,8 @@
   "adjustments",
   "status_section",
   "status",
+  "column_break_pove",
+  "generation_date",
   "ledger_entries_section",
   "ledger_entries"
  ],
@@ -128,12 +130,22 @@
    "label": "Ledger Entries",
    "options": "Commission Statement Entry",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_pove",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "generation_date",
+   "fieldtype": "Datetime",
+   "label": "Generation Date",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-26 18:10:22.603929",
+ "modified": "2026-10-01 10:28:42.914619",
  "modified_by": "Administrator",
  "module": "Incentive Compensation",
  "name": "Commission Statement",
