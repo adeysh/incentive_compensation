@@ -2,6 +2,14 @@ import frappe
 
 
 def _aggregate_entries(entries, group_field=None):
+    """
+    Aggregate commission ledger entries.
+
+    Commission entries contribute to gross commission.
+    Reversal and Adjustment entries contribute to adjustments.
+    Net commission is gross commission plus adjustments.
+    """
+
     if group_field is None:
         gross_commission = 0
         adjustments = 0
@@ -9,7 +17,7 @@ def _aggregate_entries(entries, group_field=None):
         for entry in entries:
             amount = entry.commission_amount or 0
 
-            if entry.entry_type == "Commission" and entry.status != "Reversed":
+            if entry.entry_type == "Commission":
                 gross_commission += amount
 
             elif entry.entry_type in ("Reversal", "Adjustment"):
@@ -33,7 +41,7 @@ def _aggregate_entries(entries, group_field=None):
                 "adjustments": 0,
             }
 
-        if entry.entry_type == "Commission" and entry.status != "Reversed":
+        if entry.entry_type == "Commission":
             totals[group_value]["gross_commission"] += amount
 
         elif entry.entry_type in ("Reversal", "Adjustment"):
@@ -78,7 +86,6 @@ def _get_ledger_entries(
     fields = [
         "commission_amount",
         "entry_type",
-        "status",
     ]
 
     if group_field:
