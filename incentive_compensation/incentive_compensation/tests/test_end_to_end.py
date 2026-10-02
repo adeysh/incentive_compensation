@@ -11,6 +11,8 @@ from incentive_compensation.incentive_compensation.commission_engine.payout impo
     create_commission_payout,
 )
 from incentive_compensation.incentive_compensation.commission_engine.payout_workflow import (
+    cancel_payout,
+    mark_payout_failed,
     mark_payout_paid,
     start_payout_processing,
 )
@@ -847,6 +849,568 @@ class TestCommissionEndToEnd(IntegrationTestCase):
             statement.status,
             "Paid",
         )
+
+    def test_payout_cannot_be_created_for_non_posted_statement(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-28",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date=invoice.posting_date,
+            to_date=invoice.posting_date,
+        )
+
+        self.assertEqual(statement.status, "Generated")
+
+        with self.assertRaises(frappe.ValidationError) as context:
+            create_commission_payout(statement)
+
+        self.assertIn(
+            "Commission Payout can only be created for a Posted Commission Statement.",
+            str(context.exception),
+        )
+
+    def test_duplicate_active_payout_is_rejected(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-29",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date=invoice.posting_date,
+            to_date=invoice.posting_date,
+        )
+
+        submit_statement_for_review(statement.name)
+        approve_statement(statement.name)
+        post_statement(statement.name)
+
+        first_payout = create_commission_payout(statement)
+
+        self.assertEqual(first_payout.status, "Pending")
+
+        with self.assertRaises(frappe.ValidationError) as context:
+            create_commission_payout(statement)
+
+        self.assertIn(
+            "already exists",
+            str(context.exception),
+        )
+
+    def test_cancelled_payout_can_be_replaced(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-09-30",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date=invoice.posting_date,
+            to_date=invoice.posting_date,
+        )
+
+        submit_statement_for_review(statement.name)
+        approve_statement(statement.name)
+        post_statement(statement.name)
+
+        first_payout = create_commission_payout(statement)
+
+        self.assertEqual(first_payout.status, "Pending")
+
+        cancel_payout(first_payout.name)
+
+        first_payout.reload()
+
+        self.assertEqual(
+            first_payout.status,
+            "Cancelled",
+        )
+
+        second_payout = create_commission_payout(statement)
+
+        self.assertNotEqual(
+            second_payout.name,
+            first_payout.name,
+        )
+
+        self.assertEqual(
+            second_payout.status,
+            "Pending",
+        )
+
+        self.assertEqual(
+            second_payout.amount,
+            statement.net_commission,
+        )
+
+    def test_payout_status_cannot_be_changed_directly(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-10-01",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date="2026-10-01",
+            to_date="2026-10-01",
+        )
+
+        submit_statement_for_review(statement.name)
+        approve_statement(statement.name)
+        post_statement(statement.name)
+
+        payout = create_commission_payout(statement)
+
+        payout.status = "Paid"
+
+        with self.assertRaises(frappe.ValidationError) as context:
+            payout.save()
+
+        self.assertIn(
+            "status cannot be changed directly",
+            str(context.exception),
+        )
+
+    def test_invalid_payout_transition_is_rejected(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.fixed_amount_item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-10-02",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date="2026-10-02",
+            to_date="2026-10-02",
+        )
+
+        submit_statement_for_review(statement.name)
+        approve_statement(statement.name)
+        post_statement(statement.name)
+
+        payout = create_commission_payout(statement)
+
+        # Pending → Paid is not allowed.
+        with self.assertRaises(frappe.ValidationError) as context:
+            mark_payout_paid(payout.name)
+
+        self.assertIn(
+            "Cannot change Commission Payout from 'Pending' to 'Paid'",
+            str(context.exception),
+        )
+
+    def test_payout_financial_identity_is_locked_after_processing(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-10-02",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date=invoice.posting_date,
+            to_date=invoice.posting_date,
+        )
+
+        submit_statement_for_review(statement.name)
+        approve_statement(statement.name)
+        post_statement(statement.name)
+
+        payout = create_commission_payout(statement)
+
+        start_payout_processing(payout.name)
+
+        payout.reload()
+
+        second_invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-10-02",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        second_invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        second_invoice.submit()
+
+        second_statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date=second_invoice.posting_date,
+            to_date=second_invoice.posting_date,
+        )
+
+        original_amount = payout.amount
+        original_statement = payout.commission_statement
+        original_payee = payout.commission_payee
+        original_company = payout.company
+        original_currency = payout.currency
+
+        protected_fields = {
+            "amount": original_amount + 1000,
+            "commission_statement": second_statement.name,
+            "commission_payee": self.allocation_payee.name,
+            "company": "Wind Power LLC",
+            "currency": "USD",
+        }
+
+        for field, new_value in protected_fields.items():
+            payout.reload()
+
+            setattr(payout, field, new_value)
+
+            with self.assertRaises(frappe.ValidationError) as context:
+                payout.save()
+
+            self.assertIn(
+                "cannot be changed after payout processing has started",
+                str(context.exception),
+            )
+
+            payout.reload()
+
+            self.assertEqual(
+                payout.amount,
+                original_amount,
+            )
+            self.assertEqual(
+                payout.commission_statement,
+                original_statement,
+            )
+            self.assertEqual(
+                payout.commission_payee,
+                original_payee,
+            )
+            self.assertEqual(
+                payout.company,
+                original_company,
+            )
+            self.assertEqual(
+                payout.currency,
+                original_currency,
+            )
+
+    def test_payout_cannot_be_marked_paid_without_payment_date(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-10-02",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date="2026-10-02",
+            to_date="2026-10-02",
+        )
+
+        submit_statement_for_review(statement.name)
+        approve_statement(statement.name)
+        post_statement(statement.name)
+
+        payout = create_commission_payout(statement)
+
+        start_payout_processing(payout.name)
+
+        payout = frappe.get_doc("Commission Payout", payout.name)
+        payout.payment_reference = "PAY-TEST-001"
+        payout.payment_date = None
+        payout.save()
+
+        with self.assertRaises(frappe.ValidationError) as context:
+            mark_payout_paid(payout.name)
+
+        self.assertIn(
+            "Payment Date is required",
+            str(context.exception),
+        )
+
+    def test_payout_cannot_be_marked_paid_without_payment_reference(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-10-02",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date="2026-10-02",
+            to_date="2026-10-02",
+        )
+
+        submit_statement_for_review(statement.name)
+        approve_statement(statement.name)
+        post_statement(statement.name)
+
+        payout = create_commission_payout(statement)
+
+        start_payout_processing(payout.name)
+
+        payout = frappe.get_doc("Commission Payout", payout.name)
+        payout.payment_date = "2026-10-05"
+        payout.payment_reference = None
+        payout.save()
+
+        with self.assertRaises(frappe.ValidationError) as context:
+            mark_payout_paid(payout.name)
+
+        self.assertIn(
+            "Payment Reference is required",
+            str(context.exception),
+        )
+
+    def test_paid_payout_cannot_transition_back(self):
+        invoice = create_sales_invoice(
+            company=self.company,
+            customer=self.customer,
+            debit_to=self.debit_to,
+            item=self.item,
+            qty=1,
+            rate=1000,
+            currency=self.currency,
+            posting_date="2026-10-02",
+            parent_cost_center=self.cost_center,
+            cost_center=self.cost_center,
+            income_account=self.income_account,
+            do_not_submit=True,
+        )
+
+        invoice.append(
+            "sales_team",
+            {
+                "sales_person": self.sales_person,
+                "allocated_percentage": 100,
+            },
+        )
+
+        invoice.submit()
+
+        statement = create_commission_statement(
+            commission_payee=self.payee.name,
+            company=self.company,
+            currency=self.currency,
+            from_date="2026-10-02",
+            to_date="2026-10-02",
+        )
+
+        submit_statement_for_review(statement.name)
+        approve_statement(statement.name)
+        post_statement(statement.name)
+
+        payout = create_commission_payout(statement)
+
+        start_payout_processing(payout.name)
+
+        payout = frappe.get_doc("Commission Payout", payout.name)
+        payout.payment_date = "2026-10-06"
+        payout.payment_reference = "PAY-TEST-006"
+        payout.save()
+
+        mark_payout_paid(payout.name)
+
+        payout.reload()
+        self.assertEqual(payout.status, "Paid")
+
+        with self.assertRaises(frappe.ValidationError):
+            start_payout_processing(payout.name)
+
+        with self.assertRaises(frappe.ValidationError):
+            mark_payout_failed(payout.name)
+
+        with self.assertRaises(frappe.ValidationError):
+            cancel_payout(payout.name)
+
+        payout.reload()
+        self.assertEqual(payout.status, "Paid")
 
     def test_sales_invoice_cancellation_reverses_commission(self):
         invoice = create_sales_invoice(
