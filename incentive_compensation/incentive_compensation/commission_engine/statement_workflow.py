@@ -47,38 +47,10 @@ def transition_statement(statement, new_status):
     return statement
 
 
-def _submit_statement_for_review(statement):
-    return transition_statement(
-        statement,
-        "Under Review",
-    )
-
-
-def _approve_statement(statement):
-    return transition_statement(
-        statement,
-        "Approved",
-    )
-
-
-def _post_statement(statement):
-    return transition_statement(
-        statement,
-        "Posted",
-    )
-
-
 def _mark_statement_paid(statement):
     return transition_statement(
         statement,
         "Paid",
-    )
-
-
-def _cancel_statement(statement):
-    return transition_statement(
-        statement,
-        "Cancelled",
     )
 
 
@@ -91,7 +63,10 @@ def submit_statement_for_review(statement_name):
         statement_name,
     )
 
-    return _submit_statement_for_review(statement)
+    return transition_statement(
+        statement,
+        "Under Review",
+    )
 
 
 @frappe.whitelist()
@@ -103,7 +78,10 @@ def approve_statement(statement_name):
         statement_name,
     )
 
-    return _approve_statement(statement)
+    return transition_statement(
+        statement,
+        "Approved",
+    )
 
 
 @frappe.whitelist()
@@ -115,7 +93,10 @@ def post_statement(statement_name):
         statement_name,
     )
 
-    return _post_statement(statement)
+    return transition_statement(
+        statement,
+        "Posted",
+    )
 
 
 @frappe.whitelist()
@@ -139,4 +120,7 @@ def cancel_statement(statement_name):
         statement_name,
     )
 
-    return _cancel_statement(statement)
+    return transition_statement(
+        statement,
+        "Cancelled",
+    )

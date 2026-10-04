@@ -54,41 +54,6 @@ def transition_payout(payout, new_status):
     return payout
 
 
-def _start_payout_processing(payout):
-    return transition_payout(
-        payout,
-        "Processing",
-    )
-
-
-def _mark_payout_paid(payout):
-    return transition_payout(
-        payout,
-        "Paid",
-    )
-
-
-def _mark_payout_failed(payout):
-    return transition_payout(
-        payout,
-        "Failed",
-    )
-
-
-def _retry_payout(payout):
-    return transition_payout(
-        payout,
-        "Processing",
-    )
-
-
-def _cancel_payout(payout):
-    return transition_payout(
-        payout,
-        "Cancelled",
-    )
-
-
 @frappe.whitelist()
 def start_payout_processing(payout_name):
     require_role("Commission Payout Manager")
@@ -98,7 +63,10 @@ def start_payout_processing(payout_name):
         payout_name,
     )
 
-    return _start_payout_processing(payout)
+    return transition_payout(
+        payout,
+        "Processing",
+    )
 
 
 @frappe.whitelist()
@@ -110,7 +78,10 @@ def mark_payout_paid(payout_name):
         payout_name,
     )
 
-    return _mark_payout_paid(payout)
+    return transition_payout(
+        payout,
+        "Paid",
+    )
 
 
 @frappe.whitelist()
@@ -122,7 +93,10 @@ def mark_payout_failed(payout_name):
         payout_name,
     )
 
-    return _mark_payout_failed(payout)
+    return transition_payout(
+        payout,
+        "Failed",
+    )
 
 
 @frappe.whitelist()
@@ -134,7 +108,10 @@ def retry_payout(payout_name):
         payout_name,
     )
 
-    return _retry_payout(payout)
+    return transition_payout(
+        payout,
+        "Processing",
+    )
 
 
 @frappe.whitelist()
@@ -146,4 +123,7 @@ def cancel_payout(payout_name):
         payout_name,
     )
 
-    return _cancel_payout(payout)
+    return transition_payout(
+        payout,
+        "Cancelled",
+    )
