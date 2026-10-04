@@ -56,59 +56,6 @@ def validate_commission_statement(doc, method=None):
                 title="Invalid Statement Transition",
             )
 
-    # A generated statement is a financial snapshot.
-    # Its contents cannot be changed after creation.
-    protected_fields = [
-        "commission_payee",
-        "company",
-        "currency",
-        "from_date",
-        "to_date",
-        "gross_commission",
-        "adjustments",
-        "net_commission",
-        "generation_date",
-    ]
-
-    for field in protected_fields:
-        if doc.get(field) != old_doc.get(field):
-            frappe.throw(
-                f"Field '{field}' cannot be changed "
-                f"after the Commission Statement has been generated.",
-                title="Statement Field Locked",
-            )
-
-    # Ledger entries are part of the immutable snapshot.
-    old_entries = {
-        row.name: {
-            "commission_ledger": row.commission_ledger,
-            "sales_invoice": row.sales_invoice,
-            "transaction_date": row.transaction_date,
-            "commission_amount": row.commission_amount,
-            "entry_type": row.entry_type,
-        }
-        for row in old_doc.ledger_entries
-    }
-
-    new_entries = {
-        row.name: {
-            "commission_ledger": row.commission_ledger,
-            "sales_invoice": row.sales_invoice,
-            "transaction_date": row.transaction_date,
-            "commission_amount": row.commission_amount,
-            "entry_type": row.entry_type,
-        }
-        for row in doc.ledger_entries
-    }
-
-    if old_entries != new_entries:
-        frappe.throw(
-            "Ledger Entries cannot be added, removed, "
-            "or modified after the Commission Statement "
-            "has been generated.",
-            title="Ledger Entries Locked",
-        )
-
 
 def validate_commission_payout(doc, method=None):
     if doc.is_new():

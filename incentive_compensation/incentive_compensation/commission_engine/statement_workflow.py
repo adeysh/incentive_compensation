@@ -1,4 +1,5 @@
 import frappe
+
 from .permissions import require_role
 
 VALID_TRANSITIONS = {
@@ -46,43 +47,35 @@ def transition_statement(statement, new_status):
     return statement
 
 
-def submit_statement_for_review(statement):
+def _submit_statement_for_review(statement):
     return transition_statement(
         statement,
         "Under Review",
     )
 
 
-def approve_statement(statement):
+def _approve_statement(statement):
     return transition_statement(
         statement,
         "Approved",
     )
 
 
-def post_statement(statement):
+def _post_statement(statement):
     return transition_statement(
         statement,
         "Posted",
     )
 
 
-def mark_statement_paid(statement):
+def _mark_statement_paid(statement):
     return transition_statement(
         statement,
         "Paid",
     )
 
 
-@frappe.whitelist()
-def cancel_statement(statement_name):
-    require_role("Commission Manager")
-
-    statement = frappe.get_doc(
-        "Commission Statement",
-        statement_name,
-    )
-
+def _cancel_statement(statement):
     return transition_statement(
         statement,
         "Cancelled",
@@ -98,10 +91,7 @@ def submit_statement_for_review(statement_name):
         statement_name,
     )
 
-    return transition_statement(
-        statement,
-        "Under Review",
-    )
+    return _submit_statement_for_review(statement)
 
 
 @frappe.whitelist()
@@ -113,10 +103,7 @@ def approve_statement(statement_name):
         statement_name,
     )
 
-    return transition_statement(
-        statement,
-        "Approved",
-    )
+    return _approve_statement(statement)
 
 
 @frappe.whitelist()
@@ -128,20 +115,28 @@ def post_statement(statement_name):
         statement_name,
     )
 
-    return transition_statement(
-        statement,
-        "Posted",
-    )
+    return _post_statement(statement)
 
 
 @frappe.whitelist()
 def mark_statement_paid(statement_name):
+    require_role("Commission Manager")
+
     statement = frappe.get_doc(
         "Commission Statement",
         statement_name,
     )
 
-    return transition_statement(
-        statement,
-        "Paid",
+    return _mark_statement_paid(statement)
+
+
+@frappe.whitelist()
+def cancel_statement(statement_name):
+    require_role("Commission Manager")
+
+    statement = frappe.get_doc(
+        "Commission Statement",
+        statement_name,
     )
+
+    return _cancel_statement(statement)

@@ -1,4 +1,5 @@
 import frappe
+
 from .permissions import require_role
 
 VALID_TRANSITIONS = {
@@ -46,42 +47,42 @@ def transition_payout(payout, new_status):
     payout.save()
 
     if new_status == "Paid":
-        from .statement_workflow import mark_statement_paid
+        from .statement_workflow import _mark_statement_paid
 
-        mark_statement_paid(payout.commission_statement)
+        _mark_statement_paid(payout.commission_statement)
 
     return payout
 
 
-def start_payout_processing(payout):
+def _start_payout_processing(payout):
     return transition_payout(
         payout,
         "Processing",
     )
 
 
-def mark_payout_paid(payout):
+def _mark_payout_paid(payout):
     return transition_payout(
         payout,
         "Paid",
     )
 
 
-def mark_payout_failed(payout):
+def _mark_payout_failed(payout):
     return transition_payout(
         payout,
         "Failed",
     )
 
 
-def retry_payout(payout):
+def _retry_payout(payout):
     return transition_payout(
         payout,
         "Processing",
     )
 
 
-def cancel_payout(payout):
+def _cancel_payout(payout):
     return transition_payout(
         payout,
         "Cancelled",
@@ -97,10 +98,7 @@ def start_payout_processing(payout_name):
         payout_name,
     )
 
-    return transition_payout(
-        payout,
-        "Processing",
-    )
+    return _start_payout_processing(payout)
 
 
 @frappe.whitelist()
@@ -112,10 +110,7 @@ def mark_payout_paid(payout_name):
         payout_name,
     )
 
-    return transition_payout(
-        payout,
-        "Paid",
-    )
+    return _mark_payout_paid(payout)
 
 
 @frappe.whitelist()
@@ -127,10 +122,7 @@ def mark_payout_failed(payout_name):
         payout_name,
     )
 
-    return transition_payout(
-        payout,
-        "Failed",
-    )
+    return _mark_payout_failed(payout)
 
 
 @frappe.whitelist()
@@ -142,10 +134,7 @@ def retry_payout(payout_name):
         payout_name,
     )
 
-    return transition_payout(
-        payout,
-        "Processing",
-    )
+    return _retry_payout(payout)
 
 
 @frappe.whitelist()
@@ -157,7 +146,4 @@ def cancel_payout(payout_name):
         payout_name,
     )
 
-    return transition_payout(
-        payout,
-        "Cancelled",
-    )
+    return _cancel_payout(payout)

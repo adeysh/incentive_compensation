@@ -18,8 +18,10 @@ IMMUTABLE_FIELDS = [
 
 
 class CommissionStatement(Document):
+
     def validate(self):
         self.validate_immutable_fields()
+        self.validate_ledger_entries()
 
     def validate_immutable_fields(self):
         if self.is_new():
@@ -42,3 +44,42 @@ class CommissionStatement(Document):
                     "cannot be changed after generation.",
                     title="Commission Statement Is Immutable",
                 )
+
+    def validate_ledger_entries(self):
+        if self.is_new():
+            return
+
+        old_doc = frappe.get_doc(
+            "Commission Statement",
+            self.name,
+        )
+
+        old_entries = {
+            row.name: {
+                "commission_ledger": row.commission_ledger,
+                "sales_invoice": row.sales_invoice,
+                "transaction_date": row.transaction_date,
+                "commission_amount": row.commission_amount,
+                "entry_type": row.entry_type,
+            }
+            for row in old_doc.ledger_entries
+        }
+
+        new_entries = {
+            row.name: {
+                "commission_ledger": row.commission_ledger,
+                "sales_invoice": row.sales_invoice,
+                "transaction_date": row.transaction_date,
+                "commission_amount": row.commission_amount,
+                "entry_type": row.entry_type,
+            }
+            for row in self.ledger_entries
+        }
+
+        if old_entries != new_entries:
+            frappe.throw(
+                "Ledger Entries cannot be added, removed, "
+                "or modified after the Commission Statement "
+                "has been generated.",
+                title="Ledger Entries Locked",
+            )

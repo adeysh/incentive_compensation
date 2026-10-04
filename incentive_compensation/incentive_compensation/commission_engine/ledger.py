@@ -105,6 +105,8 @@ def reverse_ledger_entry(ledger):
             "commission_rule": ledger.commission_rule,
             "commission_plan": ledger.commission_plan,
             "calculation_method": ledger.calculation_method,
+            "company": ledger.company,
+            "currency": ledger.currency,
             "rate": ledger.rate,
             "commission_amount": -ledger.commission_amount,
             "base_amount": ledger.base_amount,
