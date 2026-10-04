@@ -2,6 +2,7 @@ import frappe
 from frappe.utils import now_datetime
 
 from .statement_resolver import get_statement_ledger_entries
+from .permissions import require_role
 
 
 def calculate_statement_totals(entries):
@@ -91,6 +92,8 @@ def generate_commission_statement(
     from_date,
     to_date,
 ):
+    require_role("Commission Manager")
+
     statement = create_commission_statement(
         commission_payee=commission_payee,
         company=company,

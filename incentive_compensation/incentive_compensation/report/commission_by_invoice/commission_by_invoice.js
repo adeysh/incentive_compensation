@@ -25,5 +25,11 @@ frappe.query_reports["Commission by Invoice"] = {
 			reqd: 1,
 			default: frappe.datetime.get_today(),
 		},
+		{
+			fieldname: "sales_invoice",
+			label: __("Sales Invoice"),
+			fieldtype: "Link",
+			options: "Sales Invoice",
+		},
 	],
 };

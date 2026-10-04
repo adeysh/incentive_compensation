@@ -1,4 +1,5 @@
 import frappe
+from .permissions import require_role
 
 VALID_TRANSITIONS = {
     "Generated": {
@@ -73,7 +74,10 @@ def mark_statement_paid(statement):
     )
 
 
+@frappe.whitelist()
 def cancel_statement(statement_name):
+    require_role("Commission Manager")
+
     statement = frappe.get_doc(
         "Commission Statement",
         statement_name,
@@ -87,6 +91,8 @@ def cancel_statement(statement_name):
 
 @frappe.whitelist()
 def submit_statement_for_review(statement_name):
+    require_role("Commission Manager")
+
     statement = frappe.get_doc(
         "Commission Statement",
         statement_name,
@@ -100,6 +106,8 @@ def submit_statement_for_review(statement_name):
 
 @frappe.whitelist()
 def approve_statement(statement_name):
+    require_role("Commission Manager")
+
     statement = frappe.get_doc(
         "Commission Statement",
         statement_name,
@@ -113,6 +121,8 @@ def approve_statement(statement_name):
 
 @frappe.whitelist()
 def post_statement(statement_name):
+    require_role("Commission Manager")
+
     statement = frappe.get_doc(
         "Commission Statement",
         statement_name,

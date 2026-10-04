@@ -39,6 +39,7 @@ def execute(filters=None):
 
     data = get_commission_by_rule(
         company=filters.get("company"),
+        commission_rule=filters.get("commission_rule"),
         from_date=filters.get("from_date"),
         to_date=filters.get("to_date"),
     )

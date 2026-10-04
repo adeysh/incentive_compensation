@@ -13,6 +13,8 @@ def execute(filters=None):
 
     data = get_commission_by_payee(
         company=filters.get("company"),
+        commission_payee=filters.get("commission_payee"),
+        commission_plan=filters.get("commission_plan"),
         from_date=filters.get("from_date"),
         to_date=filters.get("to_date"),
     )

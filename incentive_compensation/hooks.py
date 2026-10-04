@@ -88,6 +88,23 @@ app_license = "mit"
 # before_install = "incentive_compensation.install.before_install"
 # after_install = "incentive_compensation.install.after_install"
 
+fixtures = [
+    {
+        "dt": "Role",
+        "filters": [
+            [
+                "name",
+                "in",
+                [
+                    "Commission Manager",
+                    "Commission User",
+                    "Commission Payout Manager",
+                ],
+            ]
+        ],
+    }
+]
+
 # Uninstallation
 # ------------
 

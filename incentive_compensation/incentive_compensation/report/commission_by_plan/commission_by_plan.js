@@ -25,5 +25,11 @@ frappe.query_reports["Commission by Plan"] = {
 			reqd: 1,
 			default: frappe.datetime.month_end(),
 		},
+		{
+			fieldname: "commission_plan",
+			label: "Commission Plan",
+			fieldtype: "Link",
+			options: "Commission Plan",
+		},
 	],
 };

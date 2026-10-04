@@ -39,6 +39,7 @@ def execute(filters=None):
 
     data = get_commission_by_plan(
         company=filters.get("company"),
+        commission_plan=filters.get("commission_plan"),
         from_date=filters.get("from_date"),
         to_date=filters.get("to_date"),
     )

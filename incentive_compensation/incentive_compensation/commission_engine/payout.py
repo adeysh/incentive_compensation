@@ -1,4 +1,5 @@
 import frappe
+from .permissions import require_role
 
 
 def create_commission_payout(statement):
@@ -64,6 +65,8 @@ def create_commission_payout(statement):
 
 @frappe.whitelist()
 def create_payout_from_statement(statement_name):
+    require_role("Commission Payout Manager")
+
     statement = frappe.get_doc(
         "Commission Statement",
         statement_name,

@@ -65,6 +65,9 @@ def _aggregate_entries(entries, group_field=None):
 def _get_ledger_entries(
     company=None,
     commission_payee=None,
+    commission_plan=None,
+    commission_rule=None,
+    sales_invoice=None,
     from_date=None,
     to_date=None,
     group_field=None,
@@ -76,6 +79,15 @@ def _get_ledger_entries(
 
     if commission_payee:
         filters["commission_payee"] = commission_payee
+
+    if commission_plan:
+        filters["commission_plan"] = commission_plan
+
+    if commission_rule:
+        filters["commission_rule"] = commission_rule
+
+    if sales_invoice:
+        filters["sales_invoice"] = sales_invoice
 
     if from_date and to_date:
         filters["transaction_date"] = [
@@ -116,11 +128,15 @@ def get_commission_summary(
 
 def get_commission_by_payee(
     company=None,
+    commission_payee=None,
+    commission_plan=None,
     from_date=None,
     to_date=None,
 ):
     entries = _get_ledger_entries(
         company=company,
+        commission_payee=commission_payee,
+        commission_plan=commission_plan,
         from_date=from_date,
         to_date=to_date,
         group_field="commission_payee",
@@ -141,11 +157,13 @@ def get_commission_by_payee(
 
 def get_commission_by_plan(
     company=None,
+    commission_plan=None,
     from_date=None,
     to_date=None,
 ):
     entries = _get_ledger_entries(
         company=company,
+        commission_plan=commission_plan,
         from_date=from_date,
         to_date=to_date,
         group_field="commission_plan",
@@ -166,11 +184,13 @@ def get_commission_by_plan(
 
 def get_commission_by_rule(
     company=None,
+    commission_rule=None,
     from_date=None,
     to_date=None,
 ):
     entries = _get_ledger_entries(
         company=company,
+        commission_rule=commission_rule,
         from_date=from_date,
         to_date=to_date,
         group_field="commission_rule",
@@ -191,11 +211,13 @@ def get_commission_by_rule(
 
 def get_commission_by_invoice(
     company=None,
+    sales_invoice=None,
     from_date=None,
     to_date=None,
 ):
     entries = _get_ledger_entries(
         company=company,
+        sales_invoice=sales_invoice,
         from_date=from_date,
         to_date=to_date,
         group_field="sales_invoice",

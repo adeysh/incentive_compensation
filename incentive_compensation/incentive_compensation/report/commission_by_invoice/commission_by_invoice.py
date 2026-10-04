@@ -15,6 +15,7 @@ def execute(filters=None):
 
     data = get_commission_by_invoice(
         company=filters.get("company"),
+        sales_invoice=filters.get("sales_invoice"),
         from_date=filters.get("from_date"),
         to_date=filters.get("to_date"),
     )

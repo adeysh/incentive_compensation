@@ -1,4 +1,5 @@
 import frappe
+from .permissions import require_role
 
 VALID_TRANSITIONS = {
     "Pending": {"Processing", "Cancelled"},
@@ -89,6 +90,8 @@ def cancel_payout(payout):
 
 @frappe.whitelist()
 def start_payout_processing(payout_name):
+    require_role("Commission Payout Manager")
+
     payout = frappe.get_doc(
         "Commission Payout",
         payout_name,
@@ -102,6 +105,8 @@ def start_payout_processing(payout_name):
 
 @frappe.whitelist()
 def mark_payout_paid(payout_name):
+    require_role("Commission Payout Manager")
+
     payout = frappe.get_doc(
         "Commission Payout",
         payout_name,
@@ -115,6 +120,8 @@ def mark_payout_paid(payout_name):
 
 @frappe.whitelist()
 def mark_payout_failed(payout_name):
+    require_role("Commission Payout Manager")
+
     payout = frappe.get_doc(
         "Commission Payout",
         payout_name,
@@ -128,6 +135,8 @@ def mark_payout_failed(payout_name):
 
 @frappe.whitelist()
 def retry_payout(payout_name):
+    require_role("Commission Payout Manager")
+
     payout = frappe.get_doc(
         "Commission Payout",
         payout_name,
@@ -141,6 +150,8 @@ def retry_payout(payout_name):
 
 @frappe.whitelist()
 def cancel_payout(payout_name):
+    require_role("Commission Payout Manager")
+
     payout = frappe.get_doc(
         "Commission Payout",
         payout_name,

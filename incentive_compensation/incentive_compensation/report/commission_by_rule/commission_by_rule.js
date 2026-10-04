@@ -25,5 +25,11 @@ frappe.query_reports["Commission by Rule"] = {
 			reqd: 1,
 			default: frappe.datetime.month_end(),
 		},
+		{
+			fieldname: "commission_rule",
+			label: "Commission Rule",
+			fieldtype: "Link",
+			options: "Commission Rule",
+		},
 	],
 };

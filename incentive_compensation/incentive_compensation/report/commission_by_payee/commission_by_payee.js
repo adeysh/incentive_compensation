@@ -25,5 +25,11 @@ frappe.query_reports["Commission by Payee"] = {
 			reqd: 1,
 			default: frappe.datetime.month_end(),
 		},
+		{
+			fieldname: "commission_payee",
+			label: "Commission Payee",
+			fieldtype: "Link",
+			options: "Commission Payee",
+		},
 	],
 };

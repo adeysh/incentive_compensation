@@ -122,6 +122,20 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Commission Manager"
+  },
+  {
+   "read": 1,
+   "role": "Commission User"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "write": 1,
+   "role": "Commission Payout Manager"
   }
  ],
  "row_format": "Dynamic",
