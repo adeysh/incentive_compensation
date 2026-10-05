@@ -9,9 +9,9 @@
  "field_order": [
   "details_section",
   "commission_payee",
-  "company",
-  "column_break_ikde",
   "currency",
+  "column_break_ikde",
+  "company",
   "period_section",
   "from_date",
   "column_break_ouis",
@@ -60,6 +60,7 @@
    "in_list_view": 1,
    "label": "Currency",
    "options": "Currency",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -86,17 +87,21 @@
   {
    "fieldname": "commission_section",
    "fieldtype": "Section Break",
-   "label": "Commission"
+   "label": "Commission",
+   "read_only": 1
   },
   {
    "fieldname": "gross_commission",
    "fieldtype": "Currency",
-   "label": "Gross Commission"
+   "label": "Gross Commission",
+   "read_only": 1
   },
   {
+   "bold": 1,
    "fieldname": "net_commission",
    "fieldtype": "Currency",
-   "label": "Net Commission"
+   "label": "Net Commission",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_exhe",
@@ -105,7 +110,8 @@
   {
    "fieldname": "adjustments",
    "fieldtype": "Currency",
-   "label": "Adjustments"
+   "label": "Adjustments",
+   "read_only": 1
   },
   {
    "fieldname": "status_section",
@@ -117,6 +123,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "Draft\nGenerated\nUnder Review\nApproved\nPosted\nPaid\nCancelled",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -145,7 +152,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-01 10:28:42.914619",
+ "modified": "2026-10-05 12:41:21.388957",
  "modified_by": "Administrator",
  "module": "Incentive Compensation",
  "name": "Commission Statement",

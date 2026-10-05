@@ -3,6 +3,15 @@
 
 frappe.ui.form.on("Commission Statement", {
 	refresh(frm) {
+		if (frm.doc.status == "Draft") {
+			frm.set_intro(
+				__(
+					"This will generate a commission statement for the selected payee and period using eligible commission ledger entries.",
+				),
+				"blue",
+			);
+		}
+
 		if (frm.is_new()) {
 			frm.add_custom_button(__("Generate Statement"), () => {
 				generate_commission_statement(frm);

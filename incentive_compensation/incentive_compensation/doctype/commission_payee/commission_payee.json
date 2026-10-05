@@ -10,11 +10,10 @@
   "details_section",
   "payee_name",
   "sales_person",
+  "enabled",
   "column_break_xhbc",
   "payee_type",
-  "sales_partner",
-  "status_section",
-  "enabled"
+  "sales_partner"
  ],
  "fields": [
   {
@@ -23,41 +22,48 @@
    "label": "Details"
   },
   {
+   "description": "Use a recognizable name for this commission recipient. This name appears in commission reports and statements.",
    "fieldname": "payee_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Payee Name",
    "reqd": 1,
+   "show_description_on_click": 1,
    "unique": 1
   },
   {
+   "description": "Select whether this commission recipient is an Employee or Sales Partner.",
    "fieldname": "payee_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Payee Type",
    "options": "Employee\nSales Partner",
-   "reqd": 1
+   "reqd": 1,
+   "show_description_on_click": 1
   },
   {
+   "depends_on": "eval:doc.payee_type==\"Employee\";",
+   "description": "The Sales Person associated with this commission payee.",
    "fieldname": "sales_person",
    "fieldtype": "Link",
    "label": "Sales Person",
-   "options": "Sales Person"
+   "mandatory_depends_on": "eval:doc.payee_type==\"Employee\";",
+   "options": "Sales Person",
+   "show_description_on_click": 1
   },
   {
+   "depends_on": "eval:doc.payee_type==\"Sales Partner\";",
+   "description": "The Sales Partner associated with this commission payee.",
    "fieldname": "sales_partner",
    "fieldtype": "Link",
    "label": "Sales Partner",
-   "options": "Sales Partner"
+   "mandatory_depends_on": "eval:doc.payee_type==\"Sales Partner\";",
+   "options": "Sales Partner",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_xhbc",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "status_section",
-   "fieldtype": "Section Break",
-   "label": "Status"
   },
   {
    "default": "1",
@@ -69,7 +75,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-20 19:08:06.602278",
+ "modified": "2026-10-04 23:20:15.093195",
  "modified_by": "Administrator",
  "module": "Incentive Compensation",
  "name": "Commission Payee",
@@ -91,8 +97,8 @@
   {
    "create": 1,
    "read": 1,
-   "write": 1,
-   "role": "Commission Manager"
+   "role": "Commission Manager",
+   "write": 1
   }
  ],
  "row_format": "Dynamic",

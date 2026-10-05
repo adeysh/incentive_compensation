@@ -163,9 +163,6 @@ doc_events = {
     "Commission Statement": {
         "validate": "incentive_compensation.incentive_compensation.commission_engine.commission_events.validate_commission_statement",
     },
-    "Commission Payout": {
-        "validate": "incentive_compensation.incentive_compensation.commission_engine.commission_events.validate_commission_payout",
-    },
 }
 
 # Scheduled Tasks

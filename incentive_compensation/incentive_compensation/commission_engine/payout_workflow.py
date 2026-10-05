@@ -49,7 +49,12 @@ def transition_payout(payout, new_status):
     if new_status == "Paid":
         from .statement_workflow import _mark_statement_paid
 
-        _mark_statement_paid(payout.commission_statement)
+        statement = frappe.get_doc(
+            "Commission Statement",
+            payout.commission_statement,
+        )
+
+        _mark_statement_paid(statement)
 
     return payout
 

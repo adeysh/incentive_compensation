@@ -85,16 +85,18 @@ function mark_payout_as_paid(frm) {
 	}
 
 	frappe.confirm(__("Mark this Commission Payout as Paid?"), () => {
-		frappe.call({
-			method: "incentive_compensation.incentive_compensation.commission_engine.payout_workflow.mark_payout_paid",
-			args: {
-				payout_name: frm.doc.name,
-			},
-			freeze: true,
-			freeze_message: __("Marking Commission Payout as Paid..."),
-			callback() {
-				frm.reload_doc();
-			},
+		frm.save().then(() => {
+			frappe.call({
+				method: "incentive_compensation.incentive_compensation.commission_engine.payout_workflow.mark_payout_paid",
+				args: {
+					payout_name: frm.doc.name,
+				},
+				freeze: true,
+				freeze_message: __("Marking Commission Payout as Paid..."),
+				callback() {
+					frm.reload_doc();
+				},
+			});
 		});
 	});
 }

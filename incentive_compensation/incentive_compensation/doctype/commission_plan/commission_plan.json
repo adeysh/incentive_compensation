@@ -9,15 +9,14 @@
  "field_order": [
   "plan_details_section",
   "plan_name",
-  "currency",
-  "column_break_pike",
   "company",
+  "column_break_pike",
+  "status",
+  "currency",
   "validity_section",
   "valid_from",
   "column_break_xgqg",
-  "valid_to",
-  "status_section",
-  "status"
+  "valid_to"
  ],
  "fields": [
   {
@@ -30,6 +29,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Plan Name",
+   "placeholder": "FY 2026\u201327 Sales Commission Plan",
    "reqd": 1,
    "unique": 1
   },
@@ -42,12 +42,14 @@
    "reqd": 1
   },
   {
+   "description": "Currency used for commission calculations and payouts.",
    "fieldname": "currency",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Currency",
    "options": "Currency",
-   "reqd": 1
+   "reqd": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_pike",
@@ -59,26 +61,26 @@
    "label": "Validity"
   },
   {
+   "description": "Define the period during which this commission plan applies.",
    "fieldname": "valid_from",
    "fieldtype": "Date",
    "label": "Valid From",
-   "reqd": 1
+   "reqd": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_xgqg",
    "fieldtype": "Column Break"
   },
   {
+   "description": "Date until which this commission plan applies. Leave blank for an open-ended plan.",
    "fieldname": "valid_to",
    "fieldtype": "Date",
-   "label": "Valid To"
+   "label": "Valid To",
+   "show_description_on_click": 1
   },
   {
-   "fieldname": "status_section",
-   "fieldtype": "Section Break",
-   "label": "Status"
-  },
-  {
+   "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
@@ -89,7 +91,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-20 21:06:15.162842",
+ "modified": "2026-10-05 12:01:19.770798",
  "modified_by": "Administrator",
  "module": "Incentive Compensation",
  "name": "Commission Plan",
@@ -111,8 +113,8 @@
   {
    "create": 1,
    "read": 1,
-   "write": 1,
-   "role": "Commission Manager"
+   "role": "Commission Manager",
+   "write": 1
   }
  ],
  "row_format": "Dynamic",
@@ -120,5 +122,6 @@
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "plan_name",
  "track_changes": 1
 }

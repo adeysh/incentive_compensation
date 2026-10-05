@@ -9,7 +9,6 @@
  "field_order": [
   "source_transaction_section",
   "sales_invoice",
-  "source_key",
   "entry_type",
   "column_break_mkbq",
   "sales_invoice_item",
@@ -28,18 +27,21 @@
   "column_break_vaat",
   "base_amount",
   "fixed_amount",
-  "status_section",
   "status",
   "dates_section",
   "transaction_date",
   "column_break_xbmn",
-  "calculation_date"
+  "calculation_date",
+  "audit_details_section",
+  "source_key"
  ],
  "fields": [
   {
+   "description": "Source transaction that generated this commission entry.",
    "fieldname": "source_transaction_section",
    "fieldtype": "Section Break",
-   "label": "Source Transaction"
+   "label": "Source Transaction",
+   "read_only": 1
   },
   {
    "fieldname": "sales_invoice",
@@ -47,6 +49,7 @@
    "in_list_view": 1,
    "label": "Sales Invoice",
    "options": "Sales Invoice",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -56,7 +59,8 @@
   {
    "fieldname": "commission_section",
    "fieldtype": "Section Break",
-   "label": "Commission"
+   "label": "Commission",
+   "read_only": 1
   },
   {
    "fieldname": "commission_payee",
@@ -64,6 +68,7 @@
    "in_list_view": 1,
    "label": "Commission Payee",
    "options": "Commission Payee",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -72,6 +77,7 @@
    "in_list_view": 1,
    "label": "Commission Rule",
    "options": "Commission Rule",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -84,40 +90,52 @@
    "in_list_view": 1,
    "label": "Commission Plan",
    "options": "Commission Plan",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "calculation_section",
    "fieldtype": "Section Break",
-   "label": "Calculation"
+   "label": "Calculation",
+   "read_only": 1
   },
   {
    "fieldname": "calculation_method",
    "fieldtype": "Select",
    "label": "Calculation Method",
    "options": "Percentage\nFixed Amount\nTiered",
+   "read_only": 1,
    "reqd": 1
   },
   {
+   "description": "Amount used as the basis for calculating the commission.",
    "fieldname": "base_amount",
    "fieldtype": "Currency",
    "label": "Base Amount",
-   "reqd": 1
+   "read_only": 1,
+   "reqd": 1,
+   "show_description_on_click": 1
   },
   {
+   "description": "Commission rate applied to the base amount.",
    "fieldname": "rate",
    "fieldtype": "Percent",
-   "label": "Rate"
+   "label": "Rate",
+   "read_only": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "fixed_amount",
    "fieldtype": "Currency",
-   "label": "Fixed Amount"
+   "label": "Fixed Amount",
+   "read_only": 1
   },
   {
+   "bold": 1,
    "fieldname": "commission_amount",
    "fieldtype": "Currency",
    "label": "Commission Amount",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -125,41 +143,45 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status_section",
-   "fieldtype": "Section Break",
-   "label": "Status"
-  },
-  {
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
    "options": "Calculated\nUnder Review\nApproved\nPosted\nReversed\nCancelled",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "dates_section",
    "fieldtype": "Section Break",
-   "label": "Dates"
+   "label": "Dates",
+   "read_only": 1
   },
   {
+   "description": "Date of the source sales transaction.",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
    "label": "Transaction Date",
-   "reqd": 1
+   "read_only": 1,
+   "reqd": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_xbmn",
    "fieldtype": "Column Break"
   },
   {
+   "description": "Date and time when the commission was calculated.",
    "fieldname": "calculation_date",
    "fieldtype": "Datetime",
-   "label": "Calculation Date"
+   "label": "Calculation Date",
+   "read_only": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "sales_invoice_item",
    "fieldtype": "Data",
-   "label": "Sales Invoice Item"
+   "label": "Sales Invoice Item",
+   "read_only": 1
   },
   {
    "fieldname": "source_key",
@@ -173,20 +195,23 @@
    "fieldname": "reversal_of",
    "fieldtype": "Link",
    "label": "Reversal Of",
-   "options": "Commission Ledger"
+   "options": "Commission Ledger",
+   "read_only": 1
   },
   {
    "default": "Commission",
    "fieldname": "entry_type",
    "fieldtype": "Select",
    "label": "Entry Type",
-   "options": "Commission\nReversal\nAdjustment"
+   "options": "Commission\nReversal\nAdjustment",
+   "read_only": 1
   },
   {
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
    "options": "Currency",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -194,13 +219,20 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
+   "read_only": 1,
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "audit_details_section",
+   "fieldtype": "Section Break",
+   "label": "Audit Details"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-25 14:41:13.626729",
+ "modified": "2026-10-05 11:41:56.128021",
  "modified_by": "Administrator",
  "module": "Incentive Compensation",
  "name": "Commission Ledger",

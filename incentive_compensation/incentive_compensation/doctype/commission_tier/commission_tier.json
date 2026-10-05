@@ -34,10 +34,13 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 3,
+   "description": "Leave blank for the final tier. A blank To Amount means there is no upper limit.",
    "fieldname": "to_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "To Amount"
+   "label": "To Amount (Optional)",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "section_break_zakq",
@@ -54,7 +57,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-20 17:18:18.257155",
+ "modified": "2026-10-04 23:03:40.857875",
  "modified_by": "Administrator",
  "module": "Incentive Compensation",
  "name": "Commission Tier",
