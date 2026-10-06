@@ -29,6 +29,32 @@ Incentive Compensation adds a configurable commission engine to ERPNext, allowin
 - Role-based access control
 - Audit-oriented historical commission records
 
+## Screenshots
+
+### Commission Management Workspace
+
+The Commission Management Workspace provides a central view of commission performance, operations, and outstanding payouts.
+
+![Commission Management Workspace](docs/images/commission-workspace.png)
+
+### End-to-End Commission Workflow
+
+From a submitted Sales Invoice to a paid commission payout:
+
+![End-to-End Commission Workflow](docs/images/commission-e2e.gif)
+
+### Commission Rule Configuration
+
+Commission rules can be configured using transaction attributes, priorities, and different calculation methods.
+
+![Commission Rule Configuration](docs/images/commission-rule.png)
+
+### Commission Ledger
+
+Commission Ledger entries provide an immutable audit record of calculated commissions.
+
+![Commission Ledger](docs/images/commission-ledger.png)
+
 ## How It Works
 
 The basic commission lifecycle is:

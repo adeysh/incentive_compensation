@@ -3,15 +3,11 @@
 
 frappe.ui.form.on("Commission Statement", {
 	refresh(frm) {
-		if (frm.doc.status === "Draft" && !frm.__commission_intro_set) {
-			frm.set_intro(
-				__(
-					"This will generate a commission statement for the selected payee and period using eligible commission ledger entries.",
-				),
-				"blue",
-			);
+		set_statement_field_visibility(frm);
+		set_statement_intro(frm);
 
-			frm.__commission_intro_set = true;
+		if (frm.is_new()) {
+			return;
 		}
 
 		if (frm.doc.status === "Draft") {
@@ -25,6 +21,36 @@ frappe.ui.form.on("Commission Statement", {
 		add_workflow_buttons(frm);
 	},
 });
+
+function set_statement_intro(frm) {
+	if (!frm.is_new() && frm.doc.status === "Draft") {
+		if (frm.__statement_intro_shown) {
+			return;
+		}
+
+		frm.set_intro(
+			__(
+				"This statement is ready to generate. Generation will calculate eligible commissions for the selected payee and period and create an immutable snapshot.",
+			),
+			"blue",
+		);
+
+		frm.__statement_intro_shown = true;
+		return;
+	}
+
+	// Clear the intro when the statement is no longer a Draft.
+	frm.set_intro("");
+	frm.__statement_intro_shown = false;
+}
+
+function set_statement_field_visibility(frm) {
+	const generated = !frm.is_new() && frm.doc.status !== "Draft";
+
+	frm.toggle_display("commission_section", generated);
+	frm.toggle_display("generation_date", generated);
+	frm.toggle_display("ledger_entries_section", generated);
+}
 
 function generate_commission_statement(frm) {
 	if (!frm.doc.commission_payee) {
@@ -52,25 +78,17 @@ function generate_commission_statement(frm) {
 		return;
 	}
 
-	const generate = () => {
-		frappe.call({
-			method: "incentive_compensation.incentive_compensation.commission_engine.statement.generate_commission_statement",
-			args: {
-				statement_name: frm.doc.name,
-			},
-			freeze: true,
-			freeze_message: __("Generating Commission Statement..."),
-			callback() {
-				frm.reload_doc();
-			},
-		});
-	};
-
-	if (frm.is_new()) {
-		frm.save().then(generate);
-	} else {
-		generate();
-	}
+	frappe.call({
+		method: "incentive_compensation.incentive_compensation.commission_engine.statement.generate_commission_statement",
+		args: {
+			statement_name: frm.doc.name,
+		},
+		freeze: true,
+		freeze_message: __("Generating Commission Statement..."),
+		callback() {
+			frm.reload_doc();
+		},
+	});
 }
 
 function add_workflow_buttons(frm) {
