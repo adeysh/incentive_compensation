@@ -6,6 +6,8 @@ The `Unreleased` section contains changes that have not yet been included in a t
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-06
+
 ### Added
 
 - Commission Plan management.
