@@ -11,6 +11,7 @@ class CommissionTestCase(IntegrationTestCase):
 
         cls.company = "Incentive Test Company"
         cls.currency = "INR"
+        cls._create_company()
 
         cls.item = cls._create_item("E2E Test Item")
 
@@ -81,6 +82,24 @@ class CommissionTestCase(IntegrationTestCase):
             priority=100,
             rate=10,
         )
+
+    @classmethod
+    def _create_company(cls):
+        if frappe.db.exists("Company", cls.company):
+            return cls.company
+
+        company = frappe.get_doc(
+            {
+                "doctype": "Company",
+                "company_name": cls.company,
+                "abbr": "ITC",
+                "default_currency": cls.currency,
+                "country": "India",
+            }
+        )
+        company.insert()
+
+        return company.name
 
     @classmethod
     def _create_item(cls, name):
@@ -636,4 +655,3 @@ class CommissionTestCase(IntegrationTestCase):
 
         rule.insert()
         return rule
-
