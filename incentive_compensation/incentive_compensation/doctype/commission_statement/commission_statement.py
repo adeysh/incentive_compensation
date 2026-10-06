@@ -24,7 +24,7 @@ class CommissionStatement(Document):
         self.validate_ledger_entries()
 
     def validate_immutable_fields(self):
-        if self.is_new():
+        if self.is_new() or self.flags.generating:
             return
 
         old_values = frappe.db.get_value(
@@ -46,7 +46,7 @@ class CommissionStatement(Document):
                 )
 
     def validate_ledger_entries(self):
-        if self.is_new():
+        if self.is_new() or self.flags.generating:
             return
 
         old_doc = frappe.get_doc(

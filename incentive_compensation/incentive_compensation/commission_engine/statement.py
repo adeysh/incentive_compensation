@@ -34,12 +34,38 @@ def create_commission_statement(
     from_date,
     to_date,
 ):
+    statement = frappe.get_doc(
+        {
+            "doctype": "Commission Statement",
+            "commission_payee": commission_payee,
+            "company": company,
+            "currency": currency,
+            "from_date": from_date,
+            "to_date": to_date,
+            "status": "Draft",
+        }
+    )
+
+    statement.insert()
+
+    return statement
+
+
+def generate_statement(statement):
+    if statement.status != "Draft":
+        frappe.throw(
+            "Only Draft Commission Statements can be generated.",
+            title="Invalid Statement Status",
+        )
+
+    statement.flags.generating = True
+
     entries = get_statement_ledger_entries(
-        commission_payee,
-        company,
-        currency,
-        from_date,
-        to_date,
+        statement.commission_payee,
+        statement.company,
+        statement.currency,
+        statement.from_date,
+        statement.to_date,
     )
 
     if not entries:
@@ -51,21 +77,13 @@ def create_commission_statement(
 
     totals = calculate_statement_totals(entries)
 
-    statement = frappe.get_doc(
-        {
-            "doctype": "Commission Statement",
-            "commission_payee": commission_payee,
-            "company": company,
-            "currency": currency,
-            "from_date": from_date,
-            "to_date": to_date,
-            "gross_commission": totals["gross_commission"],
-            "adjustments": totals["adjustments"],
-            "net_commission": totals["net_commission"],
-            "generation_date": now_datetime(),
-            "status": "Generated",
-        }
-    )
+    statement.gross_commission = totals["gross_commission"]
+    statement.adjustments = totals["adjustments"]
+    statement.net_commission = totals["net_commission"]
+    statement.generation_date = now_datetime()
+    statement.status = "Generated"
+
+    statement.set("ledger_entries", [])
 
     for entry in entries:
         statement.append(
@@ -79,27 +97,23 @@ def create_commission_statement(
             },
         )
 
-    statement.insert()
+    statement.save()
 
     return statement
 
 
 @frappe.whitelist()
-def generate_commission_statement(
-    commission_payee,
-    company,
-    currency,
-    from_date,
-    to_date,
-):
+def generate_commission_statement(statement_name):
     require_role("Commission Manager")
 
-    statement = create_commission_statement(
-        commission_payee=commission_payee,
-        company=company,
-        currency=currency,
-        from_date=from_date,
-        to_date=to_date,
-    )
+    statement = frappe.get_doc("Commission Statement", statement_name)
+
+    if statement.status != "Draft":
+        frappe.throw(
+            "Only Draft Commission Statements can be generated.",
+            title="Invalid Statement Status",
+        )
+
+    generate_statement(statement)
 
     return statement.name

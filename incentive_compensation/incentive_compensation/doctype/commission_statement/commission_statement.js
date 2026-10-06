@@ -3,16 +3,18 @@
 
 frappe.ui.form.on("Commission Statement", {
 	refresh(frm) {
-		if (frm.doc.status == "Draft") {
+		if (frm.doc.status === "Draft" && !frm.__commission_intro_set) {
 			frm.set_intro(
 				__(
 					"This will generate a commission statement for the selected payee and period using eligible commission ledger entries.",
 				),
 				"blue",
 			);
+
+			frm.__commission_intro_set = true;
 		}
 
-		if (frm.is_new()) {
+		if (frm.doc.status === "Draft") {
 			frm.add_custom_button(__("Generate Statement"), () => {
 				generate_commission_statement(frm);
 			});
@@ -50,25 +52,25 @@ function generate_commission_statement(frm) {
 		return;
 	}
 
-	frappe.call({
-		method: "incentive_compensation.incentive_compensation.commission_engine.statement.generate_commission_statement",
-		args: {
-			commission_payee: frm.doc.commission_payee,
-			company: frm.doc.company,
-			currency: frm.doc.currency,
-			from_date: frm.doc.from_date,
-			to_date: frm.doc.to_date,
-		},
-		freeze: true,
-		freeze_message: __("Generating Commission Statement..."),
-		callback(response) {
-			if (!response.message) {
-				return;
-			}
+	const generate = () => {
+		frappe.call({
+			method: "incentive_compensation.incentive_compensation.commission_engine.statement.generate_commission_statement",
+			args: {
+				statement_name: frm.doc.name,
+			},
+			freeze: true,
+			freeze_message: __("Generating Commission Statement..."),
+			callback() {
+				frm.reload_doc();
+			},
+		});
+	};
 
-			frappe.set_route("Form", "Commission Statement", response.message);
-		},
-	});
+	if (frm.is_new()) {
+		frm.save().then(generate);
+	} else {
+		generate();
+	}
 }
 
 function add_workflow_buttons(frm) {

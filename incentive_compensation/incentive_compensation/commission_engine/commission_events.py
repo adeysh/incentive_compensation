@@ -27,30 +27,42 @@ def validate_commission_statement(doc, method=None):
     if not old_status:
         return
 
-    # Status changes must go through the statement workflow.
-    if doc.status != old_status:
-        from .statement_workflow import VALID_TRANSITIONS
+    if doc.status == old_status:
+        return
 
-        allowed_statuses = VALID_TRANSITIONS.get(
-            old_status,
-            set(),
+    # Draft → Generated is performed by the
+    # controlled statement-generation operation.
+    if (
+        old_status == "Draft"
+        and doc.status == "Generated"
+        and getattr(doc.flags, "generating", False)
+    ):
+        return
+
+    # All other status changes must go through
+    # the statement workflow.
+    from .statement_workflow import VALID_TRANSITIONS
+
+    allowed_statuses = VALID_TRANSITIONS.get(
+        old_status,
+        set(),
+    )
+
+    if not getattr(
+        doc.flags,
+        "allow_statement_transition",
+        False,
+    ):
+        frappe.throw(
+            f"Commission Statement status cannot be "
+            f"changed directly from '{old_status}' to "
+            f"'{doc.status}'. Use the statement workflow.",
+            title="Use Statement Workflow",
         )
 
-        if not getattr(
-            doc.flags,
-            "allow_statement_transition",
-            False,
-        ):
-            frappe.throw(
-                f"Commission Statement status cannot be "
-                f"changed directly from '{old_status}' to "
-                f"'{doc.status}'. Use the statement workflow.",
-                title="Use Statement Workflow",
-            )
-
-        if doc.status not in allowed_statuses:
-            frappe.throw(
-                f"Cannot change Commission Statement "
-                f"from '{old_status}' to '{doc.status}'.",
-                title="Invalid Statement Transition",
-            )
+    if doc.status not in allowed_statuses:
+        frappe.throw(
+            f"Cannot change Commission Statement "
+            f"from '{old_status}' to '{doc.status}'.",
+            title="Invalid Statement Transition",
+        )
