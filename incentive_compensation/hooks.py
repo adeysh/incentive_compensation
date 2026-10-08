@@ -18,7 +18,6 @@ add_to_apps_screen = [
         "logo": "/assets/incentive_compensation/images/logo.svg",
         "title": "Incentive Compensation",
         "route": "/incentive_compensation",
-        "has_permission": "incentive_compensation.api.permission.has_app_permission",
     }
 ]
 
