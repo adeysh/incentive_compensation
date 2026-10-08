@@ -1,3 +1,11 @@
+<p align="center">
+  <img
+    src="docs/images/wordmark-dark.svg"
+    alt="ERPNext Incentive Compensation Engine"
+    width="720"
+  />
+</p>
+
 # Incentive Compensation
 
 Commission and incentive compensation engine for ERPNext.

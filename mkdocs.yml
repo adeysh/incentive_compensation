@@ -1,0 +1,110 @@
+# File: mkdocs.yml
+
+site_name: ERPNext Incentive Compensation Engine
+site_description: Commission and incentive compensation engine for ERPNext
+site_url: https://adeysh.github.io/incentive_compensation/
+
+repo_name: adeysh/incentive_compensation
+repo_url: https://github.com/adeysh/incentive_compensation
+edit_uri: edit/version-16/docs/
+
+theme:
+  name: material
+
+  logo: images/logo.svg
+  favicon: images/favicon.svg
+
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+  font:
+    text: Inter
+    code: "JetBrains Mono"
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/adeysh/incentive_compensation
+      name: GitHub repository
+    - icon: material/bug
+      link: https://github.com/adeysh/incentive_compensation/issues/new
+      name: Report an issue
+  generator: true
+
+nav:
+  - Home: index.md
+
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quick-start.md
+
+  - Concepts:
+      - Overview: concepts/overview.md
+      - Commission Plans: concepts/commission-plans.md
+      - Commission Rules: concepts/commission-rules.md
+      - Commission Payees: concepts/commission-payees.md
+      - Commission Ledger: concepts/commission-ledger.md
+      - Commission Statements: concepts/commission-statements.md
+      - Commission Payouts: concepts/commission-payouts.md
+
+  - Workflows:
+      - Commission Lifecycle: workflows/commission-lifecycle.md
+      - Statement Workflow: workflows/statement-workflow.md
+      - Payout Workflow: workflows/payout-workflow.md
+      - Reversals: workflows/reversals.md
+
+  - Configuration:
+      - Plans: configuration/plans.md
+      - Rules: configuration/rules.md
+      - Payees: configuration/payees.md
+
+  - Reports:
+      - Reports: reports/reports.md
+
+  - Development:
+      - Architecture: development/architecture.md
+      - Calculation Engine: development/calculation-engine.md
+      - Events: development/events.md
+      - Testing: development/testing.md
+      - Contributing: development/contributing.md
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed

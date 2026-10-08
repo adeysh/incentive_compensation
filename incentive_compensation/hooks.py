@@ -4,6 +4,7 @@ app_publisher = "Adesh Katiya"
 app_description = "Commission and incentive compensation engine for ERPNext"
 app_email = "adeshkatiya.dev@gmail.com"
 app_license = "mit"
+app_logo_url = "/assets/incentive_compensation/images/logo.svg"
 
 # Apps
 # ------------------
@@ -11,15 +12,15 @@ app_license = "mit"
 # required_apps = []
 
 # Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "incentive_compensation",
-# 		"logo": "/assets/incentive_compensation/logo.png",
-# 		"title": "Incentive Compensation",
-# 		"route": "/incentive_compensation",
-# 		"has_permission": "incentive_compensation.api.permission.has_app_permission"
-# 	}
-# ]
+add_to_apps_screen = [
+    {
+        "name": "incentive_compensation",
+        "logo": "/assets/incentive_compensation/images/logo.svg",
+        "title": "Incentive Compensation",
+        "route": "/incentive_compensation",
+        "has_permission": "incentive_compensation.api.permission.has_app_permission",
+    }
+]
 
 # Includes in <head>
 # ------------------
