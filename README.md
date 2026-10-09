@@ -67,35 +67,17 @@ Commission Ledger entries provide an immutable audit record of calculated commis
 
 The basic commission lifecycle is:
 
-```text
-Commission Plan
-│
-▼
-Commission Rule
-│
-▼
-Commission Payee
-│
-▼
-Sales Invoice
-│
-▼
-Commission Ledger
-│
-▼
-Commission Statement
-│
-▼
-Review
-│
-▼
-Approval
-│
-▼
-Posting
-│
-▼
-Commission Payout
+```mermaid
+graph TD
+    A[Commission Plan] --> B[Commission Rule]
+    B --> C[Commission Payee]
+    C --> D[Sales Invoice]
+    D --> E[Commission Ledger]
+    E --> F[Commission Statement]
+    F --> G[Review]
+    G --> H[Approval]
+    H --> I[Posting]
+    I --> J[Commission Payout]
 ```
 
 ### 1. Commission Plan
@@ -208,38 +190,27 @@ Payouts track:
 
 **Commission Statement**
 
-```text
-Generated
-│
-▼
-Under Review
-│
-▼
-Approved
-│
-▼
-Posted
-│
-▼
-Paid
+```mermaid
+graph TD
+    A[Generated] --> B[Under Review]
+    B --> C[Approved]
+    C --> D[Posted]
+    D --> E[Paid]
 ```
 
 Statements can also be cancelled from the appropriate workflow stages.
 
 **Commission Payout**
 
-```text
-Pending
-│
-▼
-Processing
-│
-├──────────► Failed
-│ │
-│ └──► Processing
-│
-▼
-Paid
+```mermaid
+graph TD
+    A[Pending] --> B[Processing]
+    B --> C{Payout Status}
+
+    C -- Success --> D[Paid]
+    C -- Error --> E[Failed]
+
+    E -->|Retry| B
 ```
 
 Payouts can also be cancelled from the appropriate workflow stages.
