@@ -4,6 +4,8 @@ site_name: ERPNext Incentive Compensation Engine
 site_description: Commission and incentive compensation engine for ERPNext
 site_url: https://adeysh.github.io/incentive_compensation/
 
+dev_addr: 127.0.0.1:8001
+
 repo_name: adeysh/incentive_compensation
 repo_url: https://github.com/adeysh/incentive_compensation
 edit_uri: edit/version-16/docs/
