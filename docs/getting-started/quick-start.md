@@ -209,10 +209,9 @@ From the Generated statement, click:
 
 The status changes to:
 
-```text
-Generated
-      ↓
-Under Review
+```mermaid
+flowchart LR
+A("Generated") --> B("Under Review")
 ```
 
 This represents the review stage of the commission process.
@@ -225,10 +224,9 @@ From the Under Review statement, click:
 
 The status changes to:
 
-```text
-Under Review
-      ↓
-Approved
+```mermaid
+flowchart LR
+A("Under Review") --> B("Approved")
 ```
 
 The approved statement is ready to be finalized.
@@ -241,10 +239,9 @@ From the Approved statement, click:
 
 The status changes to:
 
-```text
-Approved
-      ↓
-Posted
+```mermaid
+flowchart LR
+A("Approved") --> B("Posted")
 ```
 
 A Posted statement is finalized and can be used to create a Commission Payout.
@@ -276,10 +273,9 @@ Open the newly created Commission Payout.
 
 Move the payout through its workflow:
 
-```text
-Pending
-   ↓
-Processing
+```mermaid
+flowchart LR
+A("Pending") --> B("Processing")
 ```
 
 When the payment has actually been made, enter the required payment information.
@@ -299,10 +295,9 @@ Then click:
 
 The payout moves to:
 
-```text
-Processing
-      ↓
-Paid
+```mermaid
+flowchart LR
+A("Processing") --> B("Paid")
 ```
 
 The associated Commission Statement is also marked as **Paid**.
@@ -311,28 +306,18 @@ The associated Commission Statement is also marked as **Paid**.
 
 You have now completed the full commission lifecycle:
 
-```text
-Sales Invoice
-      ↓
-Commission Calculation
-      ↓
-Commission Ledger
-      ↓
-Commission Statement
-      ↓
-Generated
-      ↓
-Under Review
-      ↓
-Approved
-      ↓
-Posted
-      ↓
-Commission Payout
-      ↓
-Processing
-      ↓
-Paid
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Commission Calculation]
+    B --> C[Commission Ledger]
+    C --> D[Commission Statement]
+    D --> E[Generated]
+    E --> F[Under Review]
+    F --> G[Approved]
+    G --> H[Posted]
+    H --> I[Commission Payout]
+    I --> J[Processing]
+    J --> K[Paid]
 ```
 
 ## What You Learned

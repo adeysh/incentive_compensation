@@ -1,3 +1,5 @@
+<!-- File: calculation-engine.md -->
+
 # Calculation Engine
 
 The calculation engine is responsible for determining how much commission a transaction should generate.
@@ -8,22 +10,15 @@ It separates transaction preparation, configuration resolution, commission evalu
 
 The overall calculation pipeline is:
 
-```text
-ERPNext Sales Invoice
-        ↓
-Transaction Builder
-        ↓
-Plan Resolution
-        ↓
-Rule Resolution
-        ↓
-Payee Resolution
-        ↓
-Commission Evaluation
-        ↓
-Commission Calculation
-        ↓
-Commission Ledger
+```mermaid
+flowchart TD
+    A[ERPNext Sales Invoice] --> B[Transaction Builder]
+    B --> C[Plan Resolution]
+    C --> D[Rule Resolution]
+    D --> E[Payee Resolution]
+    E --> F[Commission Evaluation]
+    F --> G[Commission Calculation]
+    G --> H[Commission Ledger]
 ```
 
 The calculation engine does not replace ERPNext's Sales Invoice processing. It consumes the relevant sales transaction information and produces Commission Ledger entries.
@@ -94,9 +89,9 @@ Sales Person B = 30%
 The allocated bases are:
 
 ```text
-A = ₹20,000 × 70% = ₹14,000
+A = ₹20,000 x 70% = ₹14,000
 
-B = ₹20,000 × 30% = ₹6,000
+B = ₹20,000 x 30% = ₹6,000
 ```
 
 The resulting commission records retain the transaction context needed to understand how the base amount was produced.
@@ -117,15 +112,11 @@ When multiple applicable plans exist, the plan with the most recent `valid_from`
 
 Conceptually:
 
-```text
-Applicable Plans
-       │
-       ├── Plan A — valid from Jan 1
-       ├── Plan B — valid from Apr 1
-       └── Plan C — valid from Jul 1
-                    ▲
-                    │
-             selected plan
+```mermaid
+flowchart TD
+    A[Applicable Plans] --> B["Plan A — valid from Jan 1"]
+    A --> C["Plan B — valid from Apr 1"]
+    A --> D["Plan C — valid from Jul 1 (selected plan)"]
 ```
 
 For a transaction in August, Plan C would take precedence if all three plans are otherwise applicable.
@@ -151,17 +142,11 @@ The rule also contains the calculation method and its associated configuration.
 
 For example:
 
-```text
-Commission Plan
-└── Standard Sales Commission
-       │
-       ├── Rule: Premium Smartphone
-       │     Applies to: Item
-       │     Item: Smartphone
-       │
-       └── Rule: Electronics Group
-             Applies to: Item Group
-             Item Group: Electronics
+```mermaid
+flowchart TD
+    A[Commission Plan] --> B[Standard Sales Commission]
+    B --> C["Rule: Premium Smartphone (Applies to: Item, Item: Smartphone)"]
+    B --> D["Rule: Electronics Group (Applies to: Item Group, Item Group: Electronics)"]
 ```
 
 Rules are evaluated according to their priority.
@@ -174,15 +159,10 @@ The resolver checks the condition represented by `based_on` and compares it with
 
 For example, an Item rule can be conceptually evaluated as:
 
-```text
-Rule Applies To = Item
-Rule Item       = Smartphone
-
-Transaction Item = Smartphone
-
-        ↓
-
-Match
+```mermaid
+flowchart TD
+    A["Rule Applies To = Item, Rule Item = Smartphone"] --> C[Match]
+    B["Transaction Item = Smartphone"] --> C
 ```
 
 A non-matching rule does not produce a commission calculation.
@@ -204,14 +184,11 @@ For an employee-based commission, the payee is linked to the relevant ERPNext Sa
 
 The payee resolution therefore connects:
 
-```text
-Sales Invoice
-     ↓
-Sales Team
-     ↓
-Sales Person
-     ↓
-Commission Payee
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Sales Team]
+    B --> C[Sales Person]
+    C --> D[Commission Payee]
 ```
 
 The resolved payee is stored on the resulting Commission Ledger entry.
@@ -259,7 +236,7 @@ Percentage calculation applies a commission rate to the calculated base amount.
 The basic formula is:
 
 ```text
-Commission = Base Amount × Rate / 100
+Commission = Base Amount x Rate / 100
 ```
 
 For example:
@@ -268,7 +245,7 @@ For example:
 Base Amount = ₹10,000
 Rate = 5%
 
-Commission = ₹10,000 × 5 / 100
+Commission = ₹10,000 x 5 / 100
            = ₹500
 ```
 
@@ -286,7 +263,7 @@ Base Amount = ₹6,000
 
 Rate = 5%
 
-Commission = ₹6,000 × 5 / 100
+Commission = ₹6,000 x 5 / 100
            = ₹300
 ```
 
@@ -352,17 +329,11 @@ The engine compares the calculation amount with the configured tier ranges.
 
 Conceptually:
 
-```text
-Transaction Amount
-       │
-       ▼
-Find matching tier
-       │
-       ▼
-Use tier rate
-       │
-       ▼
-Calculate commission
+```mermaid
+flowchart TD
+    A[Transaction Amount] --> B[Find matching tier]
+    B --> C[Use tier rate]
+    C --> D[Calculate commission]
 ```
 
 The selected rate is recorded on the resulting Commission Ledger entry.
@@ -377,14 +348,11 @@ The calculation layer therefore works with `Decimal` values for commission-relat
 
 Conceptually:
 
-```text
-Transaction Amount
-        ↓
-     Decimal
-        ↓
-Calculation
-        ↓
- Commission
+```mermaid
+flowchart TD
+    A[Transaction Amount] --> B[Decimal]
+    B --> C[Calculation]
+    C --> D[Commission]
 ```
 
 This helps avoid unexpected floating-point rounding behavior.
@@ -395,18 +363,13 @@ The evaluator acts as the coordinator between transaction data, configuration re
 
 Conceptually:
 
-```text
-Evaluator
-   │
-   ├── Resolve Plan
-   │
-   ├── Resolve Rule
-   │
-   ├── Resolve Payee
-   │
-   ├── Determine Base
-   │
-   └── Calculate Commission
+```mermaid
+flowchart TD
+    A[Evaluator] --> B[Resolve Plan]
+    A --> C[Resolve Rule]
+    A --> D[Resolve Payee]
+    A --> E[Determine Base]
+    A --> F[Calculate Commission]
 ```
 
 The evaluator should not need to implement every mathematical calculation itself.
@@ -421,14 +384,11 @@ It selects the appropriate calculation behavior based on the Commission Rule's c
 
 Conceptually:
 
-```text
-Calculation Method
-       │
-       ├── Percentage → percentage calculation
-       │
-       ├── Fixed      → fixed calculation
-       │
-       └── Tiered     → tier calculation
+```mermaid
+flowchart TD
+    A[Calculation Method] --> B["Percentage -> percentage calculation"]
+    A --> C["Fixed -> fixed calculation"]
+    A --> D["Tiered -> tier calculation"]
 ```
 
 This keeps method selection separate from the lower-level arithmetic.
@@ -441,10 +401,9 @@ These functions are intentionally independent of Frappe document operations.
 
 For example, a percentage calculation can conceptually be represented as:
 
-```text
-calculate_percentage(base_amount, rate)
-        ↓
-commission_amount
+```mermaid
+flowchart TD
+    A["calculate_percentage(base_amount, rate)"] --> B[commission_amount]
 ```
 
 A tiered calculation similarly receives the relevant amount and tier configuration and returns the calculated result.
@@ -485,14 +444,10 @@ The ledger layer creates a Commission Ledger entry containing the calculation re
 
 Conceptually:
 
-```text
-Calculation Result
-       │
-       ▼
-Ledger Creation
-       │
-       ▼
-Commission Ledger
+```mermaid
+flowchart TD
+    A[Calculation Result] --> B[Ledger Creation]
+    B --> C[Commission Ledger]
 ```
 
 Once created, the ledger entry becomes the historical representation of that commission calculation.
@@ -505,21 +460,13 @@ The source key identifies the calculation source so that the same commission cal
 
 Conceptually:
 
-```text
-Sales Invoice Event
-       │
-       ▼
-Calculate Commission
-       │
-       ▼
-Generate Source Key
-       │
-       ▼
-Already Exists?
-    /       \
-  Yes        No
-  │           │
-Skip       Create Ledger
+```mermaid
+flowchart TD
+    A[Sales Invoice Event] --> B[Calculate Commission]
+    B --> C[Generate Source Key]
+    C --> D{Already Exists?}
+    D -->|Yes| E[Skip]
+    D -->|No| F[Create Ledger]
 ```
 
 This protects the system against duplicate commission records when the same processing operation is encountered more than once.
@@ -532,20 +479,10 @@ This is important because Commission Plans and Rules can change over time.
 
 For example:
 
-```text
-January
-Rule = 5%
-Commission = ₹500
-
-        ↓
-
-Rule changed
-
-        ↓
-
-March
-Rule = 7%
-Commission = ₹700
+```mermaid
+flowchart TD
+    A["January: Rule = 5%, Commission = ₹500"] --> B[Rule changed]
+    B --> C["March: Rule = 7%, Commission = ₹700"]
 ```
 
 The January ledger entry remains ₹500.
@@ -564,14 +501,9 @@ Instead, the ledger layer creates a reversal entry.
 
 Conceptually:
 
-```text
-Original Commission
-₹500
-    │
-    │ Sales Invoice cancelled
-    ▼
-Reversal
--₹500
+```mermaid
+flowchart TD
+    A["Original Commission: ₹500"] -->|Sales Invoice cancelled| B["Reversal: -₹500"]
 ```
 
 The reversal entry references the original commission through `reversal_of`.
@@ -584,16 +516,12 @@ Commission Statements do not recalculate the commission amount.
 
 Instead:
 
-```text
-Sales Invoice
-     ↓
-Calculation Engine
-     ↓
-Commission Ledger
-     ↓
-Statement Resolver
-     ↓
-Commission Statement
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Calculation Engine]
+    B --> C[Commission Ledger]
+    C --> D[Statement Resolver]
+    D --> E[Commission Statement]
 ```
 
 The statement uses already-calculated ledger entries.
@@ -606,12 +534,11 @@ It uses the historical results stored in the ledger.
 
 Reports also use the Commission Ledger as their historical source.
 
-```text
-Commission Calculation
-        ↓
-Commission Ledger
-        ├──→ Statements
-        └──→ Reports
+```mermaid
+flowchart TD
+    A[Commission Calculation] --> B[Commission Ledger]
+    B --> C[Statements]
+    B --> D[Reports]
 ```
 
 This prevents reports from producing different results simply because a Commission Rule has changed since the original transaction.
@@ -650,7 +577,7 @@ The calculation proceeds as follows.
 ### 1. Transaction Base
 
 ```text
-₹10,000 × 100%
+₹10,000 x 100%
 = ₹10,000
 ```
 
@@ -663,7 +590,7 @@ The calculation proceeds as follows.
 ### 3. Commission
 
 ```text
-₹10,000 × 5%
+₹10,000 x 5%
 = ₹500
 ```
 
@@ -703,28 +630,28 @@ The engine processes the allocations independently.
 For A:
 
 ```text
-Base = ₹20,000 × 70%
+Base = ₹20,000 x 70%
      = ₹14,000
 
-Commission = ₹14,000 × 5%
+Commission = ₹14,000 x 5%
            = ₹700
 ```
 
 For B:
 
 ```text
-Base = ₹20,000 × 30%
+Base = ₹20,000 x 30%
      = ₹6,000
 
-Commission = ₹6,000 × 5%
+Commission = ₹6,000 x 5%
            = ₹300
 ```
 
 The resulting commission records are:
 
 ```text
-Sales Person A → ₹700
-Sales Person B → ₹300
+Sales Person A -> ₹700
+Sales Person B -> ₹300
 ```
 
 The total commission is:
@@ -754,24 +681,16 @@ Higher-level tests can then verify that the resolved configuration is correctly 
 
 When a commission result is unexpected, inspect the calculation in this order:
 
-```text
-1. Sales Invoice
-       ↓
-2. Sales Team contribution
-       ↓
-3. Commission Plan
-       ↓
-4. Commission Rule
-       ↓
-5. Commission Payee
-       ↓
-6. Base Amount
-       ↓
-7. Calculation Method
-       ↓
-8. Rate / Fixed Amount / Tiers
-       ↓
-9. Commission Ledger
+```mermaid
+flowchart TD
+    A["1. Sales Invoice"] --> B["2. Sales Team contribution"]
+    B --> C["3. Commission Plan"]
+    C --> D["4. Commission Rule"]
+    D --> E["5. Commission Payee"]
+    E --> F["6. Base Amount"]
+    F --> G["7. Calculation Method"]
+    G --> H["8. Rate / Fixed Amount / Tiers"]
+    H --> I["9. Commission Ledger"]
 ```
 
 This mirrors the actual processing pipeline and makes it easier to identify where an unexpected result originated.

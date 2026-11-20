@@ -88,29 +88,22 @@
 
   <div class="lifecycle">
 
-```text
-Sales Invoice
-      ↓
-Commission Calculation
-      ↓
-Commission Ledger
-      ↓
-Commission Statement
-      ↓
-Generated
-      ↓
-Under Review
-      ↓
-Approved
-      ↓
-Posted
-      ↓
-Commission Payout
-      ↓
-Processing
-      ↓
-Paid
-```
+    ```mermaid
+    flowchart TD
+        A("Sales Invoice")
+        B("Commission Calculation")
+        C("Commission Ledger")
+        D("Commission Statement")
+        E("Generated")
+        F("Under Review")
+        G("Approved")
+        H("Posted")
+        I("Commission Payout")
+        J("Processing")
+        K("Paid")
+
+        A --> B --> C --> D --> E --> F --> G --> H --> I --> J --> K
+    ```
 
   </div>
 </div>

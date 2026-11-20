@@ -1,3 +1,5 @@
+<!-- File: payout-workflow.md -->
+
 # Payout Workflow
 
 A Commission Payout tracks the process of paying an approved Commission Statement.
@@ -8,28 +10,22 @@ A payout can only be created from a Posted Commission Statement and follows a co
 
 The normal payout lifecycle is:
 
-```text
-Pending
-   ↓
-Processing
-   ↓
-Paid
+```mermaid
+flowchart TD
+    A[Pending] --> B[Processing]
+    B --> C[Paid]
 ```
 
 The workflow also supports payment failures and cancellation:
 
-```text
-Pending
-   ├──→ Processing
-   └──→ Cancelled
-
-Processing
-   ├──→ Paid
-   └──→ Failed
-
-Failed
-   ├──→ Processing
-   └──→ Cancelled
+```mermaid
+flowchart TD
+    A[Pending] --> B[Processing]
+    A --> C[Cancelled]
+    B --> D[Paid]
+    B --> E[Failed]
+    E --> B
+    E --> C
 ```
 
 ## Creating a Payout
@@ -76,18 +72,16 @@ The payout is associated with a Posted Commission Statement.
 
 The next normal transition is:
 
-```text
-Pending
-   ↓
-Processing
+```mermaid
+flowchart TD
+    A[Pending] --> B[Processing]
 ```
 
 A Pending payout can also be cancelled when the payment should no longer proceed.
 
-```text
-Pending
-   ↓
-Cancelled
+```mermaid
+flowchart TD
+    A[Pending] --> B[Cancelled]
 ```
 
 ## Processing
@@ -96,20 +90,19 @@ Processing indicates that payment processing has begun.
 
 The transition is:
 
-```text
-Pending
-   ↓
-Processing
+```mermaid
+flowchart TD
+    A[Pending] --> B[Processing]
 ```
 
 While the payout is Processing, the payment has not yet been confirmed as completed.
 
 The next possible outcomes are:
 
-```text
-Processing
-   ├──→ Paid
-   └──→ Failed
+```mermaid
+flowchart TD
+    A[Processing] --> B[Paid]
+    A --> C[Failed]
 ```
 
 ## Failed
@@ -118,20 +111,18 @@ A payout enters Failed when payment processing does not succeed.
 
 A Failed payout can be retried:
 
-```text
-Failed
-   ↓
-Processing
+```mermaid
+flowchart TD
+    A[Failed] --> B[Processing]
 ```
 
 This allows the payment process to be attempted again without changing the original Commission Statement.
 
 If the payout should no longer proceed, it can instead be cancelled:
 
-```text
-Failed
-   ↓
-Cancelled
+```mermaid
+flowchart TD
+    A[Failed] --> B[Cancelled]
 ```
 
 ## Payment Details
@@ -182,10 +173,9 @@ If Payment Reference is missing, the payout cannot be marked Paid.
 
 Once both are provided, the payout can move from:
 
-```text
-Processing
-   ↓
-Paid
+```mermaid
+flowchart TD
+    A[Processing] --> B[Paid]
 ```
 
 The payment fields provide a basic audit trail for the completed payment.
@@ -196,15 +186,10 @@ When a Commission Payout is successfully marked Paid, the associated Commission 
 
 The relationship is:
 
-```text
-Commission Payout
-       │
-       │ Mark Paid
-       ▼
-Commission Statement
-       │
-       ▼
-     Paid
+```mermaid
+flowchart TD
+    A[Commission Payout] -->|Mark Paid| B[Commission Statement]
+    B --> C[Paid]
 ```
 
 This ensures that the statement reflects the payment state of its associated payout.
@@ -241,10 +226,9 @@ This helps prevent the same approved commission from being paid more than once.
 
 Conceptually:
 
-```text
-Posted Statement
-      │
-      └── Active Payout
+```mermaid
+flowchart TD
+    A[Posted Statement] --> B[Active Payout]
 ```
 
 A second active payout for the same statement is not allowed.
@@ -255,18 +239,16 @@ A payout can be cancelled from the workflow states where cancellation is allowed
 
 The supported paths are:
 
-```text
-Pending
-   ↓
-Cancelled
+```mermaid
+flowchart TD
+    A[Pending] --> B[Cancelled]
 ```
 
 and:
 
-```text
-Failed
-   ↓
-Cancelled
+```mermaid
+flowchart TD
+    A[Failed] --> B[Cancelled]
 ```
 
 A cancelled payout does not continue through payment processing.
@@ -277,35 +259,22 @@ The Commission Statement remains a record of the approved commission.
 
 The payout workflow can be represented as:
 
-```text
-                         ┌────────────┐
-                         │   Pending  │
-                         └─────┬──────┘
-                            ┌───┴───┐
-                         Process  Cancel
-                            │       │
-                            ▼       ▼
-                    ┌────────────┐ Cancelled
-                    │ Processing │
-                    └─────┬──────┘
-                       ┌──┴──┐
-                    Paid   Failed
-                     │       │
-                     ▼    ┌──┴──┐
-                   Paid  Retry Cancel
-                             │     │
-                             ▼     ▼
-                        Processing Cancelled
+```mermaid
+flowchart TD
+    A[Pending] -->|Process| B[Processing]
+    A -->|Cancel| C[Cancelled]
+    B -->|Paid| D[Paid]
+    B -->|Failed| E[Failed]
+    E -->|Retry| B
+    E -->|Cancel| C
 ```
 
 The important normal path is:
 
-```text
-Pending
-   ↓
-Processing
-   ↓
-Paid
+```mermaid
+flowchart TD
+    A[Pending] --> B[Processing]
+    B --> C[Paid]
 ```
 
 ## Workflow Transitions
@@ -328,22 +297,18 @@ Commission calculation and payment are intentionally separate.
 
 The statement represents the approved commission:
 
-```text
-Commission Statement
-        ↓
-      Posted
+```mermaid
+flowchart TD
+    A[Commission Statement] --> B[Posted]
 ```
 
 The payout represents the payment process:
 
-```text
-Posted Statement
-        ↓
-Commission Payout
-        ↓
-Processing
-        ↓
-Paid
+```mermaid
+flowchart TD
+    A[Posted Statement] --> B[Commission Payout]
+    B --> C[Processing]
+    C --> D[Paid]
 ```
 
 This allows an organization to distinguish between:
@@ -378,10 +343,9 @@ Status:  Pending
 
 Begin processing:
 
-```text
-Pending
-   ↓
-Processing
+```mermaid
+flowchart TD
+    A[Pending] --> B[Processing]
 ```
 
 Enter:
@@ -393,10 +357,9 @@ Payment Reference: UTR-TEST-0001
 
 Mark the payout Paid:
 
-```text
-Processing
-   ↓
-Paid
+```mermaid
+flowchart TD
+    A[Processing] --> B[Paid]
 ```
 
 The associated statement then becomes:
@@ -407,18 +370,13 @@ Paid
 
 The complete payment portion of the lifecycle is:
 
-```text
-Posted Statement
-      ↓
-Pending Payout
-      ↓
-Processing
-      ↓
-Payment Date + Reference
-      ↓
-Paid
-      ↓
-Statement Paid
+```mermaid
+flowchart TD
+    A[Posted Statement] --> B[Pending Payout]
+    B --> C[Processing]
+    C --> D[Payment Date + Reference]
+    D --> E[Paid]
+    E --> F[Statement Paid]
 ```
 
 ## Failed Payment Example
@@ -427,34 +385,30 @@ Suppose a payout starts processing but the payment fails.
 
 The state becomes:
 
-```text
-Processing
-   ↓
-Failed
+```mermaid
+flowchart TD
+    A[Processing] --> B[Failed]
 ```
 
 The payment can then be retried:
 
-```text
-Failed
-   ↓
-Processing
+```mermaid
+flowchart TD
+    A[Failed] --> B[Processing]
 ```
 
 If the retry succeeds:
 
-```text
-Processing
-   ↓
-Paid
+```mermaid
+flowchart TD
+    A[Processing] --> B[Paid]
 ```
 
 If the payout should no longer be processed:
 
-```text
-Failed
-   ↓
-Cancelled
+```mermaid
+flowchart TD
+    A[Failed] --> B[Cancelled]
 ```
 
 The original Commission Statement and Commission Ledger remain historical records of the approved and calculated commission.

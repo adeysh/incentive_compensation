@@ -29,10 +29,12 @@ Commission Rules are attached to a Commission Plan and use the plan's configurat
 
 A Commission Plan can have one of the following statuses:
 
-- **Draft** — The plan is being configured and is not active.
-- **Active** — The plan can be selected for eligible transactions.
-- **Disabled** — The plan has been intentionally disabled.
-- **Expired** — The plan's validity period has ended.
+| Status       | Description                                         |
+| :----------- | :-------------------------------------------------- |
+| **Draft**    | The plan is being configured and is not active.     |
+| **Active**   | The plan can be selected for eligible transactions. |
+| **Disabled** | The plan has been intentionally disabled.           |
+| **Expired**  | The plan's validity period has ended.               |
 
 A plan must be Active and within its validity period to be considered during commission calculation.
 
@@ -95,22 +97,20 @@ Instead, it provides the container and validity context for Commission Rules.
 
 The relationship is:
 
-```text
-Commission Plan
-       │
-       ├── Commission Rule
-       ├── Commission Rule
-       └── Commission Rule
+```mermaid
+flowchart LR
+    A[Commission Plan] --> B[Commission Rule]
+    A --> C[Commission Rule]
+    A --> D[Commission Rule]
 ```
 
 For example:
 
-```text
-Standard Sales Commission
-│
-├── Smartphone Commission — 5%
-├── Laptop Commission — 7%
-└── Enterprise Customer Commission — 10%
+```mermaid
+flowchart LR
+    A[Standard Sales Commission] --> B[Smartphone Commission — 5%]
+    A --> C[Laptop Commission — 7%]
+    A --> D[Enterprise Customer Commission — 10%]
 ```
 
 The Commission Rules determine which transactions qualify and how the commission is calculated.
@@ -148,12 +148,11 @@ Rules can then be created under this plan to define the actual commission calcul
 
 For example:
 
-```text
-Standard Sales Commission
-        │
-        ├── Item A → 5%
-        ├── Item B → 7%
-        └── Customer Group X → 10%
+```mermaid
+flowchart LR
+    A[Standard Sales Commission] --> B[Item A → 5%]
+    A --> C[Item B → 7%]
+    A --> D[Customer Group X → 10%]
 ```
 
 When an eligible Sales Invoice is submitted, the engine selects the applicable plan and then evaluates its Commission Rules.

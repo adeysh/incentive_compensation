@@ -1,3 +1,5 @@
+<!-- File: events.md -->
+
 # Events
 
 The ERPNext Incentive Compensation Engine uses Frappe document events to connect ERPNext Sales Invoice activity with commission processing.
@@ -8,20 +10,14 @@ The event layer is intentionally small. It acts as the integration boundary betw
 
 The primary event flow is:
 
-```text
-ERPNext Sales Invoice
-        │
-        ├── Submit
-        │     ↓
-        │  Commission Event
-        │     ↓
-        │  Create Commission Ledger Entries
-        │
-        └── Cancel
-              ↓
-           Commission Event
-              ↓
-           Create Reversal Entries
+```mermaid
+flowchart TD
+    A[ERPNext Sales Invoice] --> B[Submit]
+    B --> C[Commission Event]
+    C --> D[Create Commission Ledger Entries]
+    A --> E[Cancel]
+    E --> F[Commission Event]
+    F --> G[Create Reversal Entries]
 ```
 
 The application currently uses Sales Invoice submission and cancellation as the source events for automatic commission processing.
@@ -30,11 +26,11 @@ The application currently uses Sales Invoice submission and cancellation as the 
 
 The event handlers are located in:
 
-```text
-incentive_compensation/
-└── incentive_compensation/
-    └── commission_engine/
-        └── commission_events.py
+```mermaid
+flowchart TD
+    A["incentive_compensation/"] --> B["incentive_compensation/"]
+    B --> C[commission_engine/]
+    C --> D[commission_events.py]
 ```
 
 The module contains the event handlers that connect Frappe document lifecycle events to the commission engine.
@@ -52,16 +48,12 @@ When a Sales Invoice is submitted, the application starts commission processing.
 
 The submission handler delegates to the ledger layer:
 
-```text
-Sales Invoice Submitted
-        ↓
-on_sales_invoice_submit()
-        ↓
-create_ledger_entries_for_invoice()
-        ↓
-Commission Calculation
-        ↓
-Commission Ledger
+```mermaid
+flowchart TD
+    A[Sales Invoice Submitted] --> B["on_sales_invoice_submit()"]
+    B --> C["create_ledger_entries_for_invoice()"]
+    C --> D[Commission Calculation]
+    D --> E[Commission Ledger]
 ```
 
 The event handler itself does not determine the commission rate or perform the calculation.
@@ -80,14 +72,11 @@ The resulting Commission Ledger entry represents the commission calculated from 
 
 Conceptually:
 
-```text
-Draft Sales Invoice
-       ↓
-Submitted Sales Invoice
-       ↓
-Commission Calculation
-       ↓
-Commission Ledger
+```mermaid
+flowchart TD
+    A[Draft Sales Invoice] --> B[Submitted Sales Invoice]
+    B --> C[Commission Calculation]
+    C --> D[Commission Ledger]
 ```
 
 The commission is therefore tied to the submitted transaction rather than an arbitrary document save.
@@ -100,14 +89,11 @@ When a Sales Invoice that has generated commissions is cancelled, the applicatio
 
 The flow is:
 
-```text
-Sales Invoice Cancelled
-        ↓
-on_sales_invoice_cancel()
-        ↓
-reverse_commissions_for_invoice()
-        ↓
-Reversal Ledger Entries
+```mermaid
+flowchart TD
+    A[Sales Invoice Cancelled] --> B["on_sales_invoice_cancel()"]
+    B --> C["reverse_commissions_for_invoice()"]
+    C --> D[Reversal Ledger Entries]
 ```
 
 The original Commission Ledger entries are not modified or deleted.
@@ -122,14 +108,9 @@ Changing the original commission entry when an invoice is cancelled would destro
 
 Instead, the system preserves the original entry and records the cancellation separately:
 
-```text
-Original Commission
-       ₹500
-         │
-         │ Invoice cancelled
-         ▼
-Reversal
-      -₹500
+```mermaid
+flowchart TD
+    A["Original Commission: ₹500"] -->|Invoice cancelled| B["Reversal: -₹500"]
 ```
 
 The reversal entry references the original commission through `reversal_of`.
@@ -160,16 +141,13 @@ Determines:
 
 Conceptually:
 
-```text
-Frappe Event
-     │
-     ▼
-Commission Engine
-     │
-     ├── Resolve
-     ├── Evaluate
-     ├── Calculate
-     └── Record
+```mermaid
+flowchart TD
+    A[Frappe Event] --> B[Commission Engine]
+    B --> C[Resolve]
+    B --> D[Evaluate]
+    B --> E[Calculate]
+    B --> F[Record]
 ```
 
 This separation prevents ERPNext-specific event handling from becoming tightly coupled to commission calculation logic.
@@ -218,12 +196,10 @@ The event handlers need to be registered against the corresponding ERPNext docum
 
 Conceptually, the application connects:
 
-```text
-Sales Invoice
-    │
-    ├── on_submit  → on_sales_invoice_submit
-    │
-    └── on_cancel  → on_sales_invoice_cancel
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B["on_submit -> on_sales_invoice_submit"]
+    A --> C["on_cancel -> on_sales_invoice_cancel"]
 ```
 
 Frappe's document event system is what allows the custom application to react to ERPNext document lifecycle events without modifying ERPNext core code.
@@ -242,12 +218,9 @@ Using Frappe hooks provides several architectural advantages:
 
 The integration point is therefore:
 
-```text
-ERPNext Core
-     │
-     │ Frappe Event
-     ▼
-Custom Application
+```mermaid
+flowchart LR
+    A[ERPNext Core] -->|Frappe Event| B[Custom Application]
 ```
 
 ## Idempotency at the Event Boundary
@@ -258,14 +231,11 @@ The commission engine therefore protects ledger creation with a source key.
 
 The important distinction is:
 
-```text
-Event Handler
-    ↓
-May be invoked more than once
-    ↓
-Ledger layer checks source identity
-    ↓
-Duplicate commission is prevented
+```mermaid
+flowchart TD
+    A[Event Handler] --> B[May be invoked more than once]
+    B --> C[Ledger layer checks source identity]
+    C --> D[Duplicate commission is prevented]
 ```
 
 The event layer triggers processing, while the ledger layer ensures that the same calculation is not recorded repeatedly.
@@ -278,14 +248,11 @@ Commission Ledger creation uses a `source_key` to identify a commission calculat
 
 Conceptually:
 
-```text
-Source Transaction
-       +
-Calculation Context
-       ↓
-Source Key
-       ↓
-Commission Ledger
+```mermaid
+flowchart TD
+    A[Source Transaction] --> C[Source Key]
+    B[Calculation Context] --> C
+    C --> D[Commission Ledger]
 ```
 
 Before creating a new ledger entry, the ledger layer can determine whether the corresponding source calculation has already been recorded.
@@ -302,30 +269,24 @@ The transaction builder then handles the Sales Team allocation.
 
 For example:
 
-```text
-Sales Invoice
-    │
-    ├── Item ₹20,000
-    │
-    └── Sales Team
-          ├── Person A — 70%
-          └── Person B — 30%
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B["Item ₹20,000"]
+    A --> C[Sales Team]
+    C --> D["Person A — 70%"]
+    C --> E["Person B — 30%"]
 ```
 
 The event handler does not calculate these allocations itself.
 
 Instead:
 
-```text
-Sales Invoice Event
-       ↓
-Transaction Builder
-       ↓
-Allocated Commission Inputs
-       ↓
-Commission Engine
-       ↓
-Ledger Entries
+```mermaid
+flowchart TD
+    A[Sales Invoice Event] --> B[Transaction Builder]
+    B --> C[Allocated Commission Inputs]
+    C --> D[Commission Engine]
+    D --> E[Ledger Entries]
 ```
 
 This keeps transaction preparation separate from event handling.
@@ -338,16 +299,12 @@ Plan resolution occurs inside the commission engine.
 
 The flow is:
 
-```text
-Sales Invoice Submitted
-        ↓
-Event Handler
-        ↓
-Commission Processing
-        ↓
-Applicable Company / Date
-        ↓
-Commission Plan Resolution
+```mermaid
+flowchart TD
+    A[Sales Invoice Submitted] --> B[Event Handler]
+    B --> C[Commission Processing]
+    C --> D[Applicable Company / Date]
+    D --> E[Commission Plan Resolution]
 ```
 
 This allows plan-selection rules to remain centralized in `resolver.py`.
@@ -377,14 +334,11 @@ The event layer does not need to know whether the commission recipient is an Emp
 
 Instead:
 
-```text
-Sales Invoice
-     ↓
-Sales Team / transaction context
-     ↓
-Payee Resolution
-     ↓
-Commission Payee
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Sales Team / transaction context]
+    B --> C[Payee Resolution]
+    C --> D[Commission Payee]
 ```
 
 The resolved payee is then stored on the Commission Ledger entry.
@@ -397,14 +351,14 @@ This is important when developing or debugging the integration.
 
 When investigating a failed Sales Invoice submission, check:
 
-```text
-1. Sales Invoice data
-2. Sales Team allocation
-3. Applicable Commission Plan
-4. Matching Commission Rule
-5. Commission Payee
-6. Calculation
-7. Ledger creation
+```mermaid
+flowchart TD
+    A["1. Sales Invoice data"] --> B["2. Sales Team allocation"]
+    B --> C["3. Applicable Commission Plan"]
+    C --> D["4. Matching Commission Rule"]
+    D --> E["5. Commission Payee"]
+    E --> F["6. Calculation"]
+    F --> G["7. Ledger creation"]
 ```
 
 The event handler is usually only the entry point; the actual error may originate deeper in the commission engine.
@@ -447,12 +401,12 @@ This follows the same order as the application's processing architecture.
 
 If cancelling a Sales Invoice does not produce a reversal, inspect:
 
-```text
-1. Was the original invoice commission recorded?
-2. Does the original ledger entry reference the invoice?
-3. Was the invoice actually cancelled?
-4. Was reversal processing triggered?
-5. Was a reversal already created?
+```mermaid
+flowchart TD
+    A["1. Was the original invoice commission recorded?"] --> B["2. Does the original ledger entry reference the invoice?"]
+    B --> C["3. Was the invoice actually cancelled?"]
+    C --> D["4. Was reversal processing triggered?"]
+    D --> E["5. Was a reversal already created?"]
 ```
 
 The original ledger entry should remain unchanged.
@@ -469,16 +423,12 @@ The cancellation event creates the corresponding reversal.
 
 This produces a historical sequence such as:
 
-```text
-Sales Invoice Submitted
-        ↓
-Commission Calculated
-        ↓
-Commission Ledger Created
-        ↓
-Sales Invoice Cancelled
-        ↓
-Commission Reversed
+```mermaid
+flowchart TD
+    A[Sales Invoice Submitted] --> B[Commission Calculated]
+    B --> C[Commission Ledger Created]
+    C --> D[Sales Invoice Cancelled]
+    D --> E[Commission Reversed]
 ```
 
 The history is therefore represented by separate records rather than destructive updates.
@@ -505,24 +455,19 @@ Test that the Frappe document event actually invokes the intended commission pro
 
 For example:
 
-```text
-Create Sales Invoice
-       ↓
-Submit
-       ↓
-Commission Ledger exists
+```mermaid
+flowchart TD
+    A[Create Sales Invoice] --> B[Submit]
+    B --> C[Commission Ledger exists]
 ```
 
 And for cancellation:
 
-```text
-Submit Sales Invoice
-       ↓
-Commission Ledger exists
-       ↓
-Cancel Invoice
-       ↓
-Reversal Ledger exists
+```mermaid
+flowchart TD
+    A[Submit Sales Invoice] --> B[Commission Ledger exists]
+    B --> C[Cancel Invoice]
+    C --> D[Reversal Ledger exists]
 ```
 
 ### End-to-End Tests
@@ -531,30 +476,22 @@ An end-to-end test should verify the full lifecycle from source transaction thro
 
 The event portion of the flow is:
 
-```text
-Sales Invoice
-       ↓
-Submit
-       ↓
-Commission Ledger
-       ↓
-Statement
-       ↓
-Payout
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Submit]
+    B --> C[Commission Ledger]
+    C --> D[Statement]
+    D --> E[Payout]
 ```
 
 and cancellation should verify:
 
-```text
-Sales Invoice
-       ↓
-Submit
-       ↓
-Original Commission
-       ↓
-Cancel
-       ↓
-Reversal
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Submit]
+    B --> C[Original Commission]
+    C --> D[Cancel]
+    D --> E[Reversal]
 ```
 
 ## Design Principles

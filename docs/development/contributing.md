@@ -1,3 +1,5 @@
+<!-- File: contributing.md -->
+
 # Contributing
 
 Thank you for contributing to the ERPNext Incentive Compensation Engine.
@@ -10,18 +12,13 @@ Before making a change, understand the part of the application you are modifying
 
 The main development areas are:
 
-```text
-Commission Configuration
-        ↓
-Commission Calculation
-        ↓
-Commission Ledger
-        ↓
-Commission Statements
-        ↓
-Commission Payouts
-        ↓
-Reports
+```mermaid
+flowchart TD
+    A[Commission Configuration] --> B[Commission Calculation]
+    B --> C[Commission Ledger]
+    C --> D[Commission Statements]
+    D --> E[Commission Payouts]
+    E --> F[Reports]
 ```
 
 The [Architecture](architecture.md) and [Calculation Engine](calculation-engine.md) documentation are useful starting points for understanding how these components fit together.
@@ -42,7 +39,7 @@ You should have a development site where the application is installed.
 From your Frappe Bench directory:
 
 ```bash
-bench get-app https://github.com/adeysh/incentive_compensation --branch version-16
+bench get-app [https://github.com/adeysh/incentive_compensation](https://github.com/adeysh/incentive_compensation) --branch version-16
 ```
 
 Install the application on a development site:
@@ -107,16 +104,12 @@ Before modifying code, identify:
 
 For example, a change to Commission Rule resolution may affect:
 
-```text
-resolver.py
-      ↓
-evaluator.py
-      ↓
-ledger.py
-      ↓
-statements
-      ↓
-reports
+```mermaid
+flowchart TD
+    A[resolver.py] --> B[evaluator.py]
+    B --> C[ledger.py]
+    C --> D[statements]
+    D --> E[reports]
 ```
 
 A change that appears small can therefore have downstream effects.
@@ -158,14 +151,11 @@ The event handler should not become a second implementation of the calculation e
 
 Keep the responsibilities separated:
 
-```text
-Frappe Event
-     ↓
-Event Handler
-     ↓
-Commission Engine
-     ↓
-Ledger
+```mermaid
+flowchart TD
+    A[Frappe Event] --> B[Event Handler]
+    B --> C[Commission Engine]
+    C --> D[Ledger]
 ```
 
 See [Events](events.md) for more information.
@@ -194,14 +184,10 @@ Changes to commission creation should preserve this behavior.
 
 When modifying the ledger creation flow, test:
 
-```text
-First processing
-    ↓
-Ledger created
-
-Repeated processing
-    ↓
-No duplicate ledger
+```mermaid
+flowchart TD
+    A[First processing] --> B[Ledger created]
+    C[Repeated processing] --> D[No duplicate ledger]
 ```
 
 A change that accidentally removes idempotency can create incorrect commission totals.
@@ -214,16 +200,12 @@ Do not bypass workflow validation by introducing direct status changes unless th
 
 For example, statement processing follows:
 
-```text
-Generated
-    ↓
-Under Review
-    ↓
-Approved
-    ↓
-Posted
-    ↓
-Paid
+```mermaid
+flowchart TD
+    A[Generated] --> B[Under Review]
+    B --> C[Approved]
+    C --> D[Posted]
+    D --> E[Paid]
 ```
 
 Payout processing has its own lifecycle.
@@ -325,34 +307,24 @@ If a change affects multiple stages of the commission lifecycle, perform an end-
 
 A representative flow is:
 
-```text
-Sales Invoice
-      ↓
-Commission Ledger
-      ↓
-Commission Statement
-      ↓
-Under Review
-      ↓
-Approved
-      ↓
-Posted
-      ↓
-Commission Payout
-      ↓
-Paid
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Commission Ledger]
+    B --> C[Commission Statement]
+    C --> D[Under Review]
+    D --> E[Approved]
+    E --> F[Posted]
+    F --> G[Commission Payout]
+    G --> H[Paid]
 ```
 
 Changes affecting Sales Invoice cancellation should also verify:
 
-```text
-Sales Invoice
-      ↓
-Original Commission
-      ↓
-Cancellation
-      ↓
-Reversal
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Original Commission]
+    B --> C[Cancellation]
+    C --> D[Reversal]
 ```
 
 ## Code Quality
@@ -393,14 +365,12 @@ Prefer small, focused changes.
 
 For example, avoid combining:
 
-```text
-Commission calculation refactor
-+
-Workspace redesign
-+
-Documentation rewrite
-+
-Unrelated bug fixes
+```mermaid
+flowchart LR
+    A[Commission calculation refactor] --> E[Single Change]
+    B[Workspace redesign] --> E
+    C[Documentation rewrite] --> E
+    D[Unrelated bug fixes] --> E
 ```
 
 into one change.
@@ -636,14 +606,11 @@ For a feature proposal, describe the problem before proposing the implementation
 
 A useful proposal should explain:
 
-```text
-Problem
-   ↓
-Current Limitation
-   ↓
-Proposed Behavior
-   ↓
-Expected Benefit
+```mermaid
+flowchart TD
+    A[Problem] --> B[Current Limitation]
+    B --> C[Proposed Behavior]
+    C --> D[Expected Benefit]
 ```
 
 For commission features, also consider whether the proposed behavior affects:
@@ -708,13 +675,13 @@ Changes that affect users or developers should be reflected in the documentation
 
 The Development documentation is now complete:
 
-```text
-Development
-├── Architecture
-├── Calculation Engine
-├── Events
-├── Testing
-└── Contributing
+```mermaid
+flowchart TD
+    A[Development] --> B[Architecture]
+    A --> C[Calculation Engine]
+    A --> D[Events]
+    A --> E[Testing]
+    A --> F[Contributing]
 ```
 
 For user-facing documentation, start with [Getting Started](../getting-started/installation.md).

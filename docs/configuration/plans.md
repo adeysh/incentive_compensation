@@ -1,3 +1,5 @@
+<!-- File: plans.md -->
+
 # Configure Commission Plans
 
 This guide explains how to configure a Commission Plan for the Incentive Compensation Engine.
@@ -19,7 +21,7 @@ A plan should normally be configured before creating its Commission Rules.
 
 Open:
 
-**Commission Plan → New**
+**Commission Plan -> New**
 
 Configure the following fields.
 
@@ -112,7 +114,7 @@ For an open-ended plan:
 
 ```text
 Valid From: 2026-10-01
-Valid To:   —
+Valid To:   -
 ```
 
 Leaving Valid To empty allows the plan to remain open-ended rather than assigning it a predetermined expiration date.
@@ -219,12 +221,11 @@ After creating the plan, create the Commission Rules that define the actual comm
 
 For example:
 
-```text
-Standard Sales Commission
-│
-├── Smartphone Commission → 5%
-├── Laptop Commission     → 7%
-└── Enterprise Customers  → 10%
+```mermaid
+flowchart TD
+    A[Standard Sales Commission] --> B["Smartphone Commission -> 5%"]
+    A --> C["Laptop Commission -> 7%"]
+    A --> D["Enterprise Customers -> 10%"]
 ```
 
 The plan provides the configuration context.
@@ -244,7 +245,7 @@ Plan Name: Standard Sales Commission
 Company:    Your Company
 Currency:   INR
 Valid From: 2026-10-01
-Valid To:   —
+Valid To:   -
 Status:     Active
 ```
 
@@ -252,12 +253,11 @@ Then create the associated Commission Rules.
 
 For example:
 
-```text
-Standard Sales Commission
-        │
-        ├── Smartphone → 5%
-        ├── Laptop → 7%
-        └── Enterprise Customer → 10%
+```mermaid
+flowchart TD
+    A[Standard Sales Commission] --> B["Smartphone -> 5%"]
+    A --> C["Laptop -> 7%"]
+    A --> D["Enterprise Customer -> 10%"]
 ```
 
 The plan and rules together provide the configuration used when eligible Sales Invoices are processed.

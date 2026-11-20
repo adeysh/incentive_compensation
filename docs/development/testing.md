@@ -1,3 +1,5 @@
+<!-- File: testing.md -->
+
 # Testing
 
 The ERPNext Incentive Compensation Engine uses multiple layers of testing to verify commission calculations, configuration resolution, historical ledger behavior, workflows, reports, and the integration with ERPNext Sales Invoices.
@@ -8,12 +10,10 @@ The testing approach separates low-level calculation tests from higher-level int
 
 The main testing layers are:
 
-```text
-Unit Tests
-    ↓
-Integration Tests
-    ↓
-End-to-End Tests
+```mermaid
+flowchart TD
+    A[Unit Tests] --> B[Integration Tests]
+    B --> C[End-to-End Tests]
 ```
 
 Each layer answers a different question.
@@ -104,7 +104,7 @@ The test should verify the calculated value directly.
 A percentage test should verify the basic formula:
 
 ```text
-Commission = Base Amount × Rate / 100
+Commission = Base Amount x Rate / 100
 ```
 
 Example:
@@ -201,14 +201,12 @@ For multiple applicable plans, the test should verify that the plan with the mos
 
 Conceptually:
 
-```text
-Plan A → Valid From: January 1
-Plan B → Valid From: April 1
-Plan C → Valid From: July 1
-
-Transaction Date: August 1
-
-Expected Plan: Plan C
+```mermaid
+flowchart TD
+    A["Plan A -> Valid From: January 1"] --> D["Transaction Date: August 1"]
+    B["Plan B -> Valid From: April 1"] --> D
+    C["Plan C -> Valid From: July 1"] --> D
+    D --> E["Expected Plan: Plan C"]
 ```
 
 This is important because plan selection determines which rules are evaluated.
@@ -238,9 +236,9 @@ When multiple rules can match, tests should verify that priority produces the in
 
 For example:
 
-```text
-Rule A → Priority 1
-Rule B → Priority 2
+```mermaid
+flowchart LR
+    A["Rule A -> Priority 1"] --> B["Rule B -> Priority 2"]
 ```
 
 If both rules match, the rule with the lower priority number is evaluated first.
@@ -267,16 +265,11 @@ A commission calculation should not create duplicate ledger entries when the sam
 
 Conceptually:
 
-```text
-First processing
-    ↓
-Ledger Entry Created
-
-Second processing
-    ↓
-Existing Source Key
-    ↓
-No Duplicate Entry
+```mermaid
+flowchart TD
+    A[First processing] --> B[Ledger Entry Created]
+    C[Second processing] --> D[Existing Source Key]
+    D --> E[No Duplicate Entry]
 ```
 
 The test should verify that only one historical commission entry exists for the same source calculation.
@@ -289,12 +282,10 @@ Tests should verify that protected calculation fields cannot be changed after th
 
 The important principle is:
 
-```text
-Calculated Result
-       ↓
-Ledger Entry
-       ↓
-Immutable History
+```mermaid
+flowchart TD
+    A[Calculated Result] --> B[Ledger Entry]
+    B --> C[Immutable History]
 ```
 
 This protects the audit trail.
@@ -305,12 +296,10 @@ When a source Sales Invoice is cancelled, the original commission entry should r
 
 A reversal test should verify:
 
-```text
-Original Commission
-       ↓
-Invoice Cancellation
-       ↓
-Reversal Entry
+```mermaid
+flowchart TD
+    A[Original Commission] --> B[Invoice Cancellation]
+    B --> C[Reversal Entry]
 ```
 
 The reversal should:
@@ -397,18 +386,13 @@ Statement workflow transitions should be explicitly tested.
 
 The intended lifecycle is:
 
-```text
-Draft
-  ↓
-Generated
-  ↓
-Under Review
-  ↓
-Approved
-  ↓
-Posted
-  ↓
-Paid
+```mermaid
+flowchart TD
+    A[Draft] --> B[Generated]
+    B --> C[Under Review]
+    C --> D[Approved]
+    D --> E[Posted]
+    E --> F[Paid]
 ```
 
 Generation is separate from the approval workflow.
@@ -419,10 +403,9 @@ Tests should verify that invalid direct transitions are rejected.
 
 For example, a statement should not be able to jump directly from:
 
-```text
-Generated
-    ↓
-Posted
+```mermaid
+flowchart TD
+    A[Generated] --> B[Posted]
 ```
 
 without going through the required review and approval stages.
@@ -441,12 +424,10 @@ Payout tests should cover:
 
 The intended payout lifecycle is:
 
-```text
-Pending
-   ↓
-Processing
-   ↓
-Paid
+```mermaid
+flowchart TD
+    A[Pending] --> B[Processing]
+    B --> C[Paid]
 ```
 
 A payout can also move through the appropriate Failed and Cancelled states.
@@ -478,18 +459,16 @@ Tests should verify each validation independently.
 
 For example:
 
-```text
-Missing Payment Date
-        ↓
-Reject Paid transition
+```mermaid
+flowchart TD
+    A[Missing Payment Date] --> B[Reject Paid transition]
 ```
 
 and:
 
-```text
-Missing Payment Reference
-        ↓
-Reject Paid transition
+```mermaid
+flowchart TD
+    A[Missing Payment Reference] --> B[Reject Paid transition]
 ```
 
 ## Payout and Statement Synchronization
@@ -500,13 +479,10 @@ This relationship should be covered by integration tests.
 
 Expected behavior:
 
-```text
-Payout
-Processing
-   ↓
-Paid
-   ↓
-Statement becomes Paid
+```mermaid
+flowchart TD
+    A[Payout: Processing] --> B[Paid]
+    B --> C[Statement becomes Paid]
 ```
 
 ## Report Tests
@@ -540,24 +516,19 @@ Integration tests verify that multiple application components work together.
 
 Examples include:
 
-```text
-Resolver
-   ↓
-Evaluator
-   ↓
-Calculator
-   ↓
-Ledger
+```mermaid
+flowchart TD
+    A[Resolver] --> B[Evaluator]
+    B --> C[Calculator]
+    C --> D[Ledger]
 ```
 
 and:
 
-```text
-Statement
-   ↓
-Workflow
-   ↓
-Payout
+```mermaid
+flowchart TD
+    A[Statement] --> B[Workflow]
+    B --> C[Payout]
 ```
 
 Integration tests are particularly useful when a feature crosses module boundaries.
@@ -568,16 +539,12 @@ A key integration test verifies that a submitted ERPNext Sales Invoice produces 
 
 The expected flow is:
 
-```text
-Create Sales Invoice
-       ↓
-Add Sales Team
-       ↓
-Submit
-       ↓
-Commission Processing
-       ↓
-Commission Ledger
+```mermaid
+flowchart TD
+    A[Create Sales Invoice] --> B[Add Sales Team]
+    B --> C[Submit]
+    C --> D[Commission Processing]
+    D --> E[Commission Ledger]
 ```
 
 The test should verify the resulting ledger information, including:
@@ -594,14 +561,11 @@ The test should verify the resulting ledger information, including:
 
 The cancellation path should verify:
 
-```text
-Submit Sales Invoice
-       ↓
-Commission Ledger Created
-       ↓
-Cancel Sales Invoice
-       ↓
-Reversal Ledger Created
+```mermaid
+flowchart TD
+    A[Submit Sales Invoice] --> B[Commission Ledger Created]
+    B --> C[Cancel Sales Invoice]
+    C --> D[Reversal Ledger Created]
 ```
 
 The original ledger entry should remain intact.
@@ -612,24 +576,16 @@ End-to-end testing verifies the complete commission lifecycle.
 
 A complete scenario should cover:
 
-```text
-Commission Configuration
-        ↓
-Sales Invoice
-        ↓
-Commission Ledger
-        ↓
-Commission Statement
-        ↓
-Review
-        ↓
-Approval
-        ↓
-Posting
-        ↓
-Commission Payout
-        ↓
-Payment
+```mermaid
+flowchart TD
+    A[Commission Configuration] --> B[Sales Invoice]
+    B --> C[Commission Ledger]
+    C --> D[Commission Statement]
+    D --> E[Review]
+    E --> F[Approval]
+    F --> G[Posting]
+    G --> H[Commission Payout]
+    H --> I[Payment]
 ```
 
 This verifies that the major application components work together as a real user workflow.
@@ -651,26 +607,20 @@ Rate: 5%
 Expected commission:
 
 ```text
-₹10,000 × 5%
+₹10,000 x 5%
 = ₹500
 ```
 
 The test then verifies:
 
-```text
-Sales Invoice
-      ↓
-Ledger = ₹500
-      ↓
-Statement = ₹500
-      ↓
-Statement Posted
-      ↓
-Payout = ₹500
-      ↓
-Payout Paid
-      ↓
-Statement Paid
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B["Ledger = ₹500"]
+    B --> C["Statement = ₹500"]
+    C --> D[Statement Posted]
+    D --> E["Payout = ₹500"]
+    E --> F[Payout Paid]
+    F --> G[Statement Paid]
 ```
 
 ## Testing the Workspace and UI
@@ -699,16 +649,12 @@ After changing calculation or workflow logic, run the relevant tests and then ru
 
 A typical progression is:
 
-```text
-Change Code
-   ↓
-Run Focused Tests
-   ↓
-Fix Failures
-   ↓
-Run Integration Tests
-   ↓
-Run Full Application Tests
+```mermaid
+flowchart TD
+    A[Change Code] --> B[Run Focused Tests]
+    B --> C[Fix Failures]
+    C --> D[Run Integration Tests]
+    D --> E[Run Full Application Tests]
 ```
 
 Focused tests make development faster, while the full suite helps detect regressions elsewhere in the application.
@@ -740,10 +686,10 @@ For example, an existing overlapping Fiscal Year can cause an ERPNext test fixtu
 
 When a failure occurs during test discovery or setup, first determine whether the failure comes from:
 
-```text
-Application Code
-       or
-Test Environment / ERPNext Fixture Setup
+```mermaid
+flowchart TD
+    A[Failure during test discovery or setup] --> B[Application Code]
+    A --> C[Test Environment / ERPNext Fixture Setup]
 ```
 
 A clean or dedicated test site is useful when diagnosing this type of failure.
@@ -752,34 +698,15 @@ A clean or dedicated test site is useful when diagnosing this type of failure.
 
 When a test fails, identify the layer first.
 
-```text
-Calculation failure
-    ↓
-Check calculator / engine
-
-Resolution failure
-    ↓
-Check resolver / evaluator
-
-Ledger failure
-    ↓
-Check ledger / source key / immutability
-
-Statement failure
-    ↓
-Check statement resolver / statement / workflow
-
-Payout failure
-    ↓
-Check payout / payout workflow
-
-Event failure
-    ↓
-Check hooks / commission events
-
-Report failure
-    ↓
-Check report query / filters
+```mermaid
+flowchart TD
+    A1[Calculation failure] --> B1[Check calculator / engine]
+    A2[Resolution failure] --> B2[Check resolver / evaluator]
+    A3[Ledger failure] --> B3[Check ledger / source key / immutability]
+    A4[Statement failure] --> B4[Check statement resolver / statement / workflow]
+    A5[Payout failure] --> B5[Check payout / payout workflow]
+    A6[Event failure] --> B6[Check hooks / commission events]
+    A7[Report failure] --> B7[Check report query / filters]
 ```
 
 This keeps debugging focused.
@@ -848,20 +775,14 @@ Before releasing a new version, verify at minimum:
 
 A practical development workflow is:
 
-```text
-1. Make a focused change
-        ↓
-2. Run the relevant unit tests
-        ↓
-3. Run related integration tests
-        ↓
-4. Perform an end-to-end check if the change affects a workflow
-        ↓
-5. Run the full application test suite
-        ↓
-6. Review the diff
-        ↓
-7. Commit the change
+```mermaid
+flowchart TD
+    A["1. Make a focused change"] --> B["2. Run the relevant unit tests"]
+    B --> C["3. Run related integration tests"]
+    C --> D["4. Perform an end-to-end check if the change affects a workflow"]
+    D --> E["5. Run the full application test suite"]
+    E --> F["6. Review the diff"]
+    F --> G["7. Commit the change"]
 ```
 
 This reduces the time spent diagnosing unrelated failures.

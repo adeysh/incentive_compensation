@@ -1,3 +1,5 @@
+<!-- File: rules.md -->
+
 # Configure Commission Rules
 
 This guide explains how to configure Commission Rules in the Incentive Compensation Engine.
@@ -26,7 +28,7 @@ The Commission Plan provides the context in which the rule is evaluated.
 
 Open:
 
-**Commission Rule → New**
+**Commission Rule -> New**
 
 Configure the rule using the following fields.
 
@@ -95,10 +97,9 @@ Lower priority numbers are evaluated first when multiple rules match.
 
 For example:
 
-```text
-Rule A → Priority 1
-Rule B → Priority 5
-Rule C → Priority 10
+```mermaid
+flowchart LR
+    A["Rule A -> Priority 1"] --> B["Rule B -> Priority 5"] --> C["Rule C -> Priority 10"]
 ```
 
 If all three rules match a transaction, Rule A has the highest precedence.
@@ -107,21 +108,18 @@ If all three rules match a transaction, Rule A has the highest precedence.
 
 Leave gaps between priority values when practical:
 
-```text
-1
-10
-20
-30
+```mermaid
+flowchart LR
+    A[1] --> B[10] --> C[20] --> D[30]
 ```
 
 This makes it easier to insert another rule later without renumbering every existing rule.
 
 For example:
 
-```text
-Priority 1  → Specific Item
-Priority 10 → Item Group
-Priority 20 → Territory
+```mermaid
+flowchart LR
+    A["Priority 1 -> Specific Item"] --> B["Priority 10 -> Item Group"] --> C["Priority 20 -> Territory"]
 ```
 
 ## 4. Rule Applies To
@@ -267,7 +265,7 @@ For a base amount of ₹10,000:
 Base Amount = ₹10,000
 Rate        = 5%
 
-Commission  = ₹10,000 × 5%
+Commission  = ₹10,000 x 5%
             = ₹500
 ```
 
@@ -339,7 +337,7 @@ Rate: 5%
 
 Tier 3
 From: ₹50,000
-To: —
+To: -
 Rate: 8%
 ```
 
@@ -428,7 +426,7 @@ Configure:
 A ₹10,000 eligible sale produces:
 
 ```text
-₹10,000 × 5% = ₹500
+₹10,000 x 5% = ₹500
 ```
 
 The result is stored in the Commission Ledger.
@@ -536,10 +534,9 @@ Priority determines which matching rule takes precedence.
 
 In this example:
 
-```text
-Priority 1
-    ↓
-Rule A selected
+```mermaid
+flowchart TD
+    A[Priority 1] --> B[Rule A selected]
 ```
 
 The 5% rule therefore takes precedence over the 3% rule.
@@ -550,20 +547,14 @@ When an eligible Sales Invoice is submitted, the commission engine evaluates the
 
 The process can be summarized as:
 
-```text
-Sales Invoice
-      ↓
-Find Applicable Commission Plan
-      ↓
-Find Enabled Matching Rules
-      ↓
-Evaluate Priority
-      ↓
-Select Applicable Rule
-      ↓
-Calculate Commission
-      ↓
-Create Commission Ledger Entry
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Find Applicable Commission Plan]
+    B --> C[Find Enabled Matching Rules]
+    C --> D[Evaluate Priority]
+    D --> E[Select Applicable Rule]
+    E --> F[Calculate Commission]
+    F --> G[Create Commission Ledger Entry]
 ```
 
 The rule is therefore responsible for both matching and calculation, while the Commission Plan establishes the overall configuration context.
@@ -615,8 +606,9 @@ Lower number = Higher precedence
 
 For example:
 
-```text
-Priority 1  → evaluated before Priority 10
+```mermaid
+flowchart LR
+    A["Priority 1 -> evaluated before Priority 10"]
 ```
 
 ### The Commission Amount Is Unexpected

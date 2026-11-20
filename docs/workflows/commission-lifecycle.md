@@ -1,23 +1,23 @@
+<!-- File: commission-lifecycle.md -->
+
 # Commission Lifecycle
 
 The Incentive Compensation Engine processes commissions through a sequence of stages, starting with an ERPNext Sales Invoice and ending with a completed Commission Payout.
 
 The complete lifecycle is:
 
-```text
-ERPNext Sales Invoice
-        ↓
-Commission Calculation
-        ↓
-Commission Ledger
-        ↓
-Commission Statement
-        ↓
-Review & Approval
-        ↓
-Commission Payout
-        ↓
-Payment
+```mermaid
+flowchart TD
+    A("Sales Invoice Submitted") --> B("Commission Calculation")
+    B --> C("Commission Ledger Entry")
+    C --> D("Commission Statement")
+    D --> E("Generated")
+    E --> F("Under Review")
+    F --> G("Approved")
+    G --> H("Posted")
+    H --> I("Commission Payout")
+    I --> J("Processing")
+    J --> K("Paid")
 ```
 
 This workflow separates calculation, historical recording, review, approval, and payment into distinct stages.
@@ -26,25 +26,14 @@ This workflow separates calculation, historical recording, review, approval, and
 
 The main records involved are:
 
-```text
-Commission Plan
-       │
-       ├── Commission Rules
-       │
-       ▼
-ERPNext Sales Invoice
-       │
-       ▼
-Commission Calculation
-       │
-       ▼
-Commission Ledger
-       │
-       ▼
-Commission Statement
-       │
-       ▼
-Commission Payout
+```mermaid
+flowchart TD
+    A[Commission Plan] --> B[Commission Rules]
+    B --> C[ERPNext Sales Invoice]
+    C --> D[Commission Calculation]
+    D --> E[Commission Ledger]
+    E --> F[Commission Statement]
+    F --> G[Commission Payout]
 ```
 
 Each record has a different responsibility.
@@ -155,18 +144,13 @@ The commission engine evaluates the submitted Sales Invoice.
 
 Conceptually:
 
-```text
-Sales Invoice
-      ↓
-Find Active Commission Plan
-      ↓
-Find Matching Commission Rules
-      ↓
-Evaluate Rule Priority
-      ↓
-Resolve Commission Payee
-      ↓
-Calculate Commission
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Find Active Commission Plan]
+    B --> C[Find Matching Commission Rules]
+    C --> D[Evaluate Rule Priority]
+    D --> E[Resolve Commission Payee]
+    E --> F[Calculate Commission]
 ```
 
 For a 5% commission on ₹10,000:
@@ -276,10 +260,9 @@ The Generated statement can be submitted for review.
 
 The transition is:
 
-```text
-Generated
-    ↓
-Under Review
+```mermaid
+flowchart TD
+    A[Generated] --> B[Under Review]
 ```
 
 This separates the calculation stage from the review stage.
@@ -292,10 +275,9 @@ Once the statement has been reviewed, approve it.
 
 The transition is:
 
-```text
-Under Review
-    ↓
-Approved
+```mermaid
+flowchart TD
+    A[Under Review] --> B[Approved]
 ```
 
 The approved statement is ready to be finalized.
@@ -306,10 +288,9 @@ Post the approved statement.
 
 The transition is:
 
-```text
-Approved
-    ↓
-Posted
+```mermaid
+flowchart TD
+    A[Approved] --> B[Posted]
 ```
 
 A Posted statement represents a finalized commission amount and can be used to create a Commission Payout.
@@ -361,10 +342,9 @@ Then mark the payout as Paid.
 
 The transition is:
 
-```text
-Processing
-    ↓
-Paid
+```mermaid
+flowchart TD
+    A[Processing] --> B[Paid]
 ```
 
 The associated Commission Statement is also marked Paid.
@@ -373,97 +353,55 @@ The associated Commission Statement is also marked Paid.
 
 A complete example can be represented as:
 
-```text
-Plan
-│
-└── Standard Sales Commission
-        │
-        └── Rule
-             │
-             └── Smartphone → 5%
-                    │
-                    ▼
-              Sales Invoice
-              ₹10,000
-                    │
-                    ▼
-              Commission
-                ₹500
-                    │
-                    ▼
-           Commission Ledger
-                    │
-                    ▼
-         Commission Statement
-               ₹500
-                    │
-                    ▼
-               Generated
-                    │
-                    ▼
-             Under Review
-                    │
-                    ▼
-               Approved
-                    │
-                    ▼
-                Posted
-                    │
-                    ▼
-          Commission Payout
-               ₹500
-                    │
-                    ▼
-              Processing
-                    │
-                    ▼
-                 Paid
+```mermaid
+flowchart TD
+    A[Plan: Standard Sales Commission] --> B["Rule: Smartphone -> 5%"]
+    B --> C["Sales Invoice: ₹10,000"]
+    C --> D["Commission: ₹500"]
+    D --> E[Commission Ledger]
+    E --> F["Commission Statement: ₹500"]
+    F --> G[Generated]
+    G --> H[Under Review]
+    H --> I[Approved]
+    I --> J[Posted]
+    J --> K["Commission Payout: ₹500"]
+    K --> L[Processing]
+    L --> M[Paid]
 ```
 
 ## Lifecycle State Summary
 
 ### Commission Statement
 
-```text
-Draft
-  ↓
-Generated
-  ↓
-Under Review
-  ↓
-Approved
-  ↓
-Posted
-  ↓
-Paid
+```mermaid
+flowchart TD
+    A[Draft] --> B[Generated]
+    B --> C[Under Review]
+    C --> D[Approved]
+    D --> E[Posted]
+    E --> F[Paid]
 ```
 
 Additional cancellation paths exist from the appropriate workflow stages.
 
 ### Commission Payout
 
-```text
-Pending
-   ↓
-Processing
-   ↓
-Paid
+```mermaid
+flowchart TD
+    A[Pending] --> B[Processing]
+    B --> C[Paid]
 ```
 
 Failure and cancellation paths are also supported:
 
-```text
-Pending
-   ├──→ Processing
-   └──→ Cancelled
-
-Processing
-   ├──→ Paid
-   └──→ Failed
-
-Failed
-   ├──→ Processing
-   └──→ Cancelled
+```mermaid
+flowchart TD
+    A[Pending] --> B[Processing]
+    A --> C[Cancelled]
+    B --> D[Paid]
+    B --> E[Failed]
+    E --> B
+    E --> C
 ```
 
 ## What Happens If the Sales Invoice Is Cancelled?
@@ -476,19 +414,17 @@ Instead, it creates a separate reversal entry.
 
 Conceptually:
 
-```text
-Original Commission
-       +
-Reversal
-       =
-Net Historical Effect
+```mermaid
+flowchart LR
+    A[Original Commission] --> C[Net Historical Effect]
+    B[Reversal] --> C
 ```
 
 For example:
 
 ```text
-Original Commission → +₹500
-Reversal            → -₹500
+Original Commission -> +₹500
+Reversal            -> -₹500
 ```
 
 The original commission remains part of the historical audit trail while the reversal records the effect of the cancellation.
@@ -501,20 +437,18 @@ The application deliberately separates the lifecycle into distinct records.
 
 The commission engine determines what commission was earned.
 
-```text
-Sales Invoice
-    ↓
-Commission Ledger
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Commission Ledger]
 ```
 
 ### Review
 
 The calculated commissions are grouped into a statement for a defined period.
 
-```text
-Commission Ledger
-    ↓
-Commission Statement
+```mermaid
+flowchart TD
+    A[Commission Ledger] --> B[Commission Statement]
 ```
 
 ### Approval
@@ -525,10 +459,9 @@ The statement moves through review and approval before becoming Posted.
 
 The Posted statement becomes the basis for an actual payout.
 
-```text
-Commission Statement
-    ↓
-Commission Payout
+```mermaid
+flowchart TD
+    A[Commission Statement] --> B[Commission Payout]
 ```
 
 This separation provides a clear audit trail and prevents the calculation process from being confused with the payment process.
@@ -537,22 +470,15 @@ This separation provides a clear audit trail and prevents the calculation proces
 
 A completed commission can be traced through the system:
 
-```text
-Sales Invoice
-     ↓
-Commission Plan
-     ↓
-Commission Rule
-     ↓
-Commission Payee
-     ↓
-Commission Ledger
-     ↓
-Commission Statement
-     ↓
-Commission Payout
-     ↓
-Payment Reference
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Commission Plan]
+    B --> C[Commission Rule]
+    C --> D[Commission Payee]
+    D --> E[Commission Ledger]
+    E --> F[Commission Statement]
+    F --> G[Commission Payout]
+    G --> H[Payment Reference]
 ```
 
 This makes it possible to start with a payment and trace it back to the commission calculation and original sales transaction.

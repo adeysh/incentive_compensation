@@ -1,3 +1,5 @@
+<!-- File: commission-payouts.md -->
+
 # Commission Payouts
 
 A Commission Payout represents the actual payment of a Commission Statement.
@@ -14,16 +16,12 @@ The payout stage separates commission approval from actual payment.
 
 The overall flow is:
 
-```text
-Commission Statement
-        ↓
-      Posted
-        ↓
-Commission Payout
-        ↓
-   Processing
-        ↓
-      Paid
+```mermaid
+flowchart TD
+    A[Commission Statement] --> B[Posted]
+    B --> C[Commission Payout]
+    C --> D[Processing]
+    D --> E[Paid]
 ```
 
 This separation allows the application to track whether an approved commission has actually been paid.
@@ -69,28 +67,22 @@ The payout inherits the relevant statement information.
 
 A Commission Payout follows an explicit workflow:
 
-```text
-Pending
-   ↓
-Processing
-   ↓
-Paid
+```mermaid
+flowchart TD
+    A[Pending] --> B[Processing]
+    B --> C[Paid]
 ```
 
 It can also move through failure or cancellation states:
 
-```text
-Pending
-   ├──→ Processing
-   └──→ Cancelled
-
-Processing
-   ├──→ Paid
-   └──→ Failed
-
-Failed
-   ├──→ Processing
-   └──→ Cancelled
+```mermaid
+flowchart TD
+    A[Pending] --> B[Processing]
+    A --> C[Cancelled]
+    B --> D[Paid]
+    B --> E[Failed]
+    E --> B
+    E --> C
 ```
 
 Each state represents a different point in the payment process.
@@ -182,20 +174,14 @@ creates a basic audit trail for the actual payment.
 
 The resulting history is:
 
-```text
-Commission Calculation
-        ↓
-Commission Statement
-        ↓
-Approved
-        ↓
-Posted
-        ↓
-Payout
-        ↓
-Payment Date + Reference
-        ↓
-Paid
+```mermaid
+flowchart TD
+    A[Commission Calculation] --> B[Commission Statement]
+    B --> C[Approved]
+    C --> D[Posted]
+    D --> E[Payout]
+    E --> F[Payment Date + Reference]
+    F --> G[Paid]
 ```
 
 ## Statement and Payout Relationship
@@ -204,10 +190,9 @@ A Commission Payout belongs to a specific Commission Statement.
 
 The relationship is:
 
-```text
-Commission Statement
-        │
-        └── Commission Payout
+```mermaid
+flowchart TD
+    A[Commission Statement] --> B[Commission Payout]
 ```
 
 The payout amount comes from the statement's net commission.
@@ -232,10 +217,9 @@ This helps prevent accidentally paying the same statement more than once.
 
 Conceptually:
 
-```text
-Posted Statement
-      │
-      └── Active Payout
+```mermaid
+flowchart TD
+    A[Posted Statement] --> B[Active Payout]
 ```
 
 A second active payout for the same statement is not allowed.
@@ -302,15 +286,11 @@ The Commission Payout records the payment.
 
 These responsibilities remain separate:
 
-```text
-Commission Ledger
-    → What was calculated?
-
-Commission Statement
-    → What was approved for the period?
-
-Commission Payout
-    → What was actually paid?
+```mermaid
+flowchart LR
+    A["Commission Ledger: What was calculated?"]
+    B["Commission Statement: What was approved for the period?"]
+    C["Commission Payout: What was actually paid?"]
 ```
 
 Marking a payout as Paid does not modify the original Commission Ledger calculation.
@@ -334,10 +314,9 @@ Status: Pending
 
 Start processing:
 
-```text
-Pending
-   ↓
-Processing
+```mermaid
+flowchart TD
+    A[Pending] --> B[Processing]
 ```
 
 Enter:
@@ -349,10 +328,9 @@ Payment Reference: UTR-TEST-0001
 
 Then mark the payout as Paid:
 
-```text
-Processing
-   ↓
-Paid
+```mermaid
+flowchart TD
+    A[Processing] --> B[Paid]
 ```
 
 The associated statement becomes:
@@ -363,26 +341,17 @@ Paid
 
 The complete process is now:
 
-```text
-Sales Invoice
-      ↓
-Commission Ledger
-      ↓
-Commission Statement
-      ↓
-Generated
-      ↓
-Under Review
-      ↓
-Approved
-      ↓
-Posted
-      ↓
-Commission Payout
-      ↓
-Processing
-      ↓
-Paid
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Commission Ledger]
+    B --> C[Commission Statement]
+    C --> D[Generated]
+    D --> E[Under Review]
+    E --> F[Approved]
+    F --> G[Posted]
+    G --> H[Commission Payout]
+    H --> I[Processing]
+    I --> J[Paid]
 ```
 
 ## Best Practices
@@ -393,16 +362,12 @@ A statement should complete its review and approval process before payment begin
 
 The normal sequence is:
 
-```text
-Generated
-    ↓
-Under Review
-    ↓
-Approved
-    ↓
-Posted
-    ↓
-Create Payout
+```mermaid
+flowchart TD
+    A[Generated] --> B[Under Review]
+    B --> C[Approved]
+    C --> D[Posted]
+    D --> E[Create Payout]
 ```
 
 ### Record Payment Details

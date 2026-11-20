@@ -1,3 +1,5 @@
+<!-- File: commission-ledger.md -->
+
 # Commission Ledger
 
 The Commission Ledger is the historical record of commission calculations.
@@ -28,16 +30,12 @@ The ledger is therefore the bridge between the original ERPNext transaction and 
 
 The ledger sits immediately after commission calculation:
 
-```text
-ERPNext Sales Invoice
-        ↓
-Commission Evaluation
-        ↓
-Commission Ledger
-        ↓
-Commission Statement
-        ↓
-Commission Payout
+```mermaid
+flowchart TD
+    A[ERPNext Sales Invoice] --> B[Commission Evaluation]
+    B --> C[Commission Ledger]
+    C --> D[Commission Statement]
+    D --> E[Commission Payout]
 ```
 
 A Sales Invoice is the source transaction.
@@ -170,18 +168,13 @@ The commission engine uses this key to prevent duplicate ledger entries when the
 
 Conceptually:
 
-```text
-Source Transaction
-       +
-Sales Invoice Item
-       +
-Commission Payee
-       +
-Commission Rule
-       +
-Entry Type
-       ↓
-Source Key
+```mermaid
+flowchart TD
+    A[Source Transaction] --> F[Source Key]
+    B[Sales Invoice Item] --> F
+    C[Commission Payee] --> F
+    D[Commission Rule] --> F
+    E[Entry Type] --> F
 ```
 
 If an entry with the same source key already exists, the engine does not create another duplicate commission entry.
@@ -194,13 +187,11 @@ The commission engine can use the Sales Team information from the Sales Invoice 
 
 For example:
 
-```text
-Sales Invoice
-      │
-      └── Sales Team
-             │
-             ├── Sales Person A → 60%
-             └── Sales Person B → 40%
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Sales Team]
+    B --> C[Sales Person A -> 60%]
+    B --> D[Sales Person B -> 40%]
 ```
 
 The transaction builder can use these contribution percentages when creating the commission calculation inputs.
@@ -256,12 +247,10 @@ The reversal records the effect of cancelling the source transaction.
 
 A separate reversal entry preserves both sides of the history:
 
-```text
-Original Commission
-        +
-Reversal
-        =
-Net Effect
+```mermaid
+flowchart LR
+    A[Original Commission] --> C[Net Effect]
+    B[Reversal] --> C
 ```
 
 This is preferable to changing the original record because it allows the system to answer both:
@@ -288,16 +277,16 @@ The statement then stores the selected ledger entries as part of its immutable s
 
 Conceptually:
 
-```text
-Commission Ledger
-      │
-      ├── Ledger Entry 1
-      ├── Ledger Entry 2
-      ├── Ledger Entry 3
-      └── Ledger Entry 4
-             │
-             ▼
-      Commission Statement
+```mermaid
+flowchart TD
+    A[Commission Ledger] --> B[Ledger Entry 1]
+    A --> C[Ledger Entry 2]
+    A --> D[Ledger Entry 3]
+    A --> E[Ledger Entry 4]
+    B --> F[Commission Statement]
+    C --> F
+    D --> F
+    E --> F
 ```
 
 ## Example
@@ -324,16 +313,12 @@ The statement references the underlying ledger entries so that the commission to
 
 The Commission Ledger creates a traceable chain from the original transaction to the final payout:
 
-```text
-Sales Invoice
-     ↓
-Commission Rule
-     ↓
-Commission Ledger
-     ↓
-Commission Statement
-     ↓
-Commission Payout
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Commission Rule]
+    B --> C[Commission Ledger]
+    C --> D[Commission Statement]
+    D --> E[Commission Payout]
 ```
 
 This allows an administrator or reviewer to trace a paid commission back to the transaction and calculation that generated it.

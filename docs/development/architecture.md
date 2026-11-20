@@ -1,3 +1,5 @@
+<!-- File: architecture.md -->
+
 # Architecture
 
 The ERPNext Incentive Compensation Engine is a Frappe application that extends ERPNext with a dedicated commission and incentive compensation lifecycle.
@@ -8,30 +10,18 @@ The architecture separates commission configuration, calculation, historical rec
 
 The application sits on top of Frappe and ERPNext.
 
-```text
-                    ERPNext
-                       │
-                       │ Sales Invoice
-                       ▼
-              Commission Events
-                       │
-                       ▼
-              Commission Engine
-                       │
-          ┌────────────┼────────────┐
-          ▼            ▼            ▼
-       Resolver     Evaluator    Calculator
-          │            │            │
-          └────────────┼────────────┘
-                       │
-                       ▼
-               Commission Ledger
-                       │
-                       ▼
-             Commission Statement
-                       │
-                       ▼
-                Commission Payout
+```mermaid
+flowchart TD
+    ERPNext -->|Sales Invoice| Events[Commission Events]
+    Events --> Engine[Commission Engine]
+    Engine --> Resolver[Resolver]
+    Engine --> Evaluator[Evaluator]
+    Engine --> Calculator[Calculator]
+    Resolver --> Ledger[Commission Ledger]
+    Evaluator --> Ledger
+    Calculator --> Ledger
+    Ledger --> Statement[Commission Statement]
+    Statement --> Payout[Commission Payout]
 ```
 
 The Commission Ledger is the historical record produced by the calculation process. Statements group eligible ledger entries into a period-based snapshot, and payouts track the payment of posted statements.
@@ -40,18 +30,18 @@ The Commission Ledger is the historical record produced by the calculation proce
 
 The main application package is:
 
-```text
-incentive_compensation/
-└── incentive_compensation/
-    ├── commission_engine/
-    ├── commission_ledger/
-    ├── commission_plan/
-    ├── commission_rule/
-    ├── commission_payee/
-    ├── commission_statement/
-    ├── commission_payout/
-    ├── commission_tier/
-    └── ...
+```mermaid
+flowchart TD
+    A["incentive_compensation/"] --> B["incentive_compensation/"]
+    B --> C[commission_engine/]
+    B --> D[commission_ledger/]
+    B --> E[commission_plan/]
+    B --> F[commission_rule/]
+    B --> G[commission_payee/]
+    B --> H[commission_statement/]
+    B --> I[commission_payout/]
+    B --> J[commission_tier/]
+    B --> K["..."]
 ```
 
 The exact Frappe-generated DocType directory structure may vary as the application evolves. The important application-level separation is between DocTypes and the reusable commission engine.
@@ -60,23 +50,23 @@ The exact Frappe-generated DocType directory structure may vary as the applicati
 
 The core business logic is organized under:
 
-```text
-incentive_compensation/
-└── commission_engine/
-    ├── calculator.py
-    ├── commission_events.py
-    ├── engine.py
-    ├── evaluator.py
-    ├── ledger.py
-    ├── payout.py
-    ├── payout_workflow.py
-    ├── permissions.py
-    ├── resolver.py
-    ├── statement.py
-    ├── statement_resolver.py
-    ├── statement_workflow.py
-    ├── transaction_builder.py
-    └── reports/
+```mermaid
+flowchart TD
+    A["incentive_compensation/"] --> B["incentive_compensation/commission_engine/"]
+    B --> C[calculator.py]
+    B --> D[commission_events.py]
+    B --> E[engine.py]
+    B --> F[evaluator.py]
+    B --> G[ledger.py]
+    B --> H[payout.py]
+    B --> I[payout_workflow.py]
+    B --> J[permissions.py]
+    B --> K[resolver.py]
+    B --> L[statement.py]
+    B --> M[statement_resolver.py]
+    B --> N[statement_workflow.py]
+    B --> O[transaction_builder.py]
+    B --> P[reports/]
 ```
 
 Each module has a focused responsibility.
@@ -172,14 +162,14 @@ Defines the overall commission configuration and validity period.
 
 A plan belongs to a Company and Currency and has a validity period.
 
-```text
-Commission Plan
-├── Plan Name
-├── Company
-├── Currency
-├── Valid From
-├── Valid To
-└── Status
+```mermaid
+flowchart TD
+    A[Commission Plan] --> B[Plan Name]
+    A --> C[Company]
+    A --> D[Currency]
+    A --> E[Valid From]
+    A --> F[Valid To]
+    A --> G[Status]
 ```
 
 ### Commission Rule
@@ -286,32 +276,16 @@ The payout lifecycle is separate from commission calculation and statement appro
 
 The main calculation path is:
 
-```text
-Sales Invoice Submitted
-        │
-        ▼
-Commission Event
-        │
-        ▼
-Transaction Builder
-        │
-        ▼
-Plan Resolver
-        │
-        ▼
-Rule Resolver
-        │
-        ▼
-Payee Resolution
-        │
-        ▼
-Commission Evaluator
-        │
-        ▼
-Commission Calculator
-        │
-        ▼
-Commission Ledger
+```mermaid
+flowchart TD
+    A[Sales Invoice Submitted] --> B[Commission Event]
+    B --> C[Transaction Builder]
+    C --> D[Plan Resolver]
+    D --> E[Rule Resolver]
+    E --> F[Payee Resolution]
+    F --> G[Commission Evaluator]
+    G --> H[Commission Calculator]
+    H --> I[Commission Ledger]
 ```
 
 The result of the calculation is stored rather than recalculated later when reports or statements are generated.
@@ -340,15 +314,12 @@ The transaction builder uses their contribution percentages to determine each me
 
 For example:
 
-```text
-Invoice Item
-₹20,000
-   │
-   ├── Sales Person A: 70%
-   │       Base = ₹14,000
-   │
-   └── Sales Person B: 30%
-           Base = ₹6,000
+```mermaid
+flowchart TD
+    A["Invoice Item: ₹20,000"] --> B["Sales Person A: 70%"]
+    B --> C["Base = ₹14,000"]
+    A --> D["Sales Person B: 30%"]
+    D --> E["Base = ₹6,000"]
 ```
 
 Each resulting commission calculation is associated with the appropriate payee.
@@ -363,14 +334,10 @@ Configuration records such as Commission Plans and Commission Rules describe how
 
 The Commission Ledger records what was actually calculated.
 
-```text
-Configuration
-     │
-     ▼
-Calculation
-     │
-     ▼
-Historical Ledger
+```mermaid
+flowchart TD
+    A[Configuration] --> B[Calculation]
+    B --> C[Historical Ledger]
 ```
 
 After a ledger entry is created, changing a Commission Plan or Commission Rule does not recalculate or modify that historical entry.
@@ -392,20 +359,14 @@ Ledger entries already included in another non-cancelled statement are excluded.
 
 The selected entries are copied into the statement as child records when the statement is generated.
 
-```text
-Commission Ledger
-      │
-      │ eligible entries
-      ▼
-Statement Resolver
-      │
-      ▼
-Commission Statement
-      │
-      ├── Gross Commission
-      ├── Adjustments
-      ├── Net Commission
-      └── Ledger Entry Snapshot
+```mermaid
+flowchart TD
+    A[Commission Ledger] -->|eligible entries| B[Statement Resolver]
+    B --> C[Commission Statement]
+    C --> D[Gross Commission]
+    C --> E[Adjustments]
+    C --> F[Net Commission]
+    C --> G[Ledger Entry Snapshot]
 ```
 
 This creates a stable statement snapshot.
@@ -422,29 +383,24 @@ Draft
 
 Generation changes it to:
 
-```text
-Draft
-  ↓
-Generated
+```mermaid
+flowchart TD
+    A[Draft] --> B[Generated]
 ```
 
 After generation, the approval workflow is:
 
-```text
-Generated
-    ↓
-Under Review
-    ├──→ Cancelled
-    ↓
-Approved
-    ├──→ Cancelled
-    ↓
-Posted
-    ↓
-Paid
+```mermaid
+flowchart TD
+    A[Generated] --> B[Under Review]
+    B --> C[Cancelled]
+    B --> D[Approved]
+    D --> C
+    D --> E[Posted]
+    E --> F[Paid]
 ```
 
-`Draft → Generated` is a generation operation rather than a normal workflow transition.
+`Draft -> Generated` is a generation operation rather than a normal workflow transition.
 
 A Posted statement is finalized and can be used to create a Commission Payout.
 
@@ -452,23 +408,14 @@ A Posted statement is finalized and can be used to create a Commission Payout.
 
 A payout is created from a Posted Commission Statement.
 
-```text
-Posted Statement
-       │
-       ▼
-Commission Payout
-       │
-       ▼
-Pending
-       │
-       ▼
-Processing
-       │
-       ├──→ Failed
-       │       │
-       │       └──→ Processing
-       │
-       └──→ Paid
+```mermaid
+flowchart TD
+    A[Posted Statement] --> B[Commission Payout]
+    B --> C[Pending]
+    C --> D[Processing]
+    D --> E[Failed]
+    E --> D
+    D --> F[Paid]
 ```
 
 Pending and Failed payouts can also be cancelled according to the payout workflow.
@@ -485,15 +432,10 @@ When a Sales Invoice that generated commission is cancelled, the application cre
 
 Conceptually:
 
-```text
-Original Commission
-       │
-       │ source invoice cancelled
-       ▼
-Reversal Entry
-       │
-       ▼
-Original + Reversal
+```mermaid
+flowchart TD
+    A[Original Commission] -->|source invoice cancelled| B[Reversal Entry]
+    B --> C[Original + Reversal]
 ```
 
 The original ledger entry remains part of the historical audit trail.
@@ -518,12 +460,10 @@ Generated Commission Statements are also protected from modification of their hi
 
 This ensures that:
 
-```text
-Calculated Result
-       ↓
-Historical Record
-       ↓
-Audit Trail
+```mermaid
+flowchart TD
+    A[Calculated Result] --> B[Historical Record]
+    B --> C[Audit Trail]
 ```
 
 remains stable even when configuration changes later.
@@ -609,46 +549,21 @@ This separation makes the system easier to reason about and protects historical 
 
 Putting the main components together:
 
-```text
-                    ERPNext Sales Invoice
-                             │
-                             ▼
-                    Commission Event
-                             │
-                             ▼
-                    Transaction Builder
-                             │
-                             ▼
-                     Plan / Rule Resolver
-                             │
-                             ▼
-                        Payee Resolver
-                             │
-                             ▼
-                         Evaluator
-                             │
-                             ▼
-                         Calculator
-                             │
-                             ▼
-                    Commission Ledger
-                             │
-                 ┌───────────┴───────────┐
-                 │                       │
-                 ▼                       ▼
-             Reports              Statement Resolver
-                                         │
-                                         ▼
-                               Commission Statement
-                                         │
-                                         ▼
-                                      Posted
-                                         │
-                                         ▼
-                                Commission Payout
-                                         │
-                                         ▼
-                                        Paid
+```mermaid
+flowchart TD
+    A[ERPNext Sales Invoice] --> B[Commission Event]
+    B --> C[Transaction Builder]
+    C --> D[Plan / Rule Resolver]
+    D --> E[Payee Resolver]
+    E --> F[Evaluator]
+    F --> G[Calculator]
+    G --> H[Commission Ledger]
+    H --> I[Reports]
+    H --> J[Statement Resolver]
+    J --> K[Commission Statement]
+    K --> L[Posted]
+    L --> M[Commission Payout]
+    M --> N[Paid]
 ```
 
 ## Design Principles

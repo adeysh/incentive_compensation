@@ -1,3 +1,5 @@
+<!-- File: commission-statements.md -->
+
 # Commission Statements
 
 A Commission Statement groups eligible Commission Ledger entries for a specific payee, company, currency, and date range.
@@ -12,16 +14,16 @@ A Commission Statement brings those calculations together into a single reviewab
 
 The relationship is:
 
-```text
-Commission Ledger
-      │
-      ├── Entry 1
-      ├── Entry 2
-      ├── Entry 3
-      └── Entry 4
-             │
-             ▼
-      Commission Statement
+```mermaid
+flowchart TD
+    A[Commission Ledger] --> B[Entry 1]
+    A --> C[Entry 2]
+    A --> D[Entry 3]
+    A --> E[Entry 4]
+    B --> F[Commission Statement]
+    C --> F
+    D --> F
+    E --> F
 ```
 
 This separation allows the application to calculate commissions at transaction time while handling review and payment as a separate business process.
@@ -93,18 +95,13 @@ The application also excludes ledger entries that have already been included in 
 
 Conceptually:
 
-```text
-Draft Statement
-      ↓
-Find eligible Ledger Entries
-      ↓
-Calculate Statement Totals
-      ↓
-Store Ledger Entries
-      ↓
-Set Generation Date
-      ↓
-Generated
+```mermaid
+flowchart TD
+    A[Draft Statement] --> B[Find eligible Ledger Entries]
+    B --> C[Calculate Statement Totals]
+    C --> D[Store Ledger Entries]
+    D --> E[Set Generation Date]
+    E --> F[Generated]
 ```
 
 A statement cannot be generated if no eligible Commission Ledger entries are found.
@@ -116,9 +113,9 @@ Generation creates a snapshot of the selected commission entries.
 For example, suppose the eligible ledger entries are:
 
 ```text
-CL-2026-00001 → ₹500
-CL-2026-00002 → ₹750
-CL-2026-00003 → ₹250
+CL-2026-00001 -> ₹500
+CL-2026-00002 -> ₹750
+CL-2026-00003 -> ₹250
 ```
 
 The generated statement stores references to those ledger entries.
@@ -145,32 +142,23 @@ The original Commission Ledger entries also remain immutable.
 
 Together, they provide two levels of history:
 
-```text
-Commission Ledger
-    ↓
-Historical calculation
-
-Commission Statement
-    ↓
-Historical grouping of calculations
+```mermaid
+flowchart TD
+    A[Commission Ledger] --> B[Historical calculation]
+    C[Commission Statement] --> D[Historical grouping of calculations]
 ```
 
 ## Statement Lifecycle
 
 A Commission Statement follows an explicit lifecycle:
 
-```text
-Draft
-  ↓
-Generated
-  ↓
-Under Review
-  ↓
-Approved
-  ↓
-Posted
-  ↓
-Paid
+```mermaid
+flowchart TD
+    A[Draft] --> B[Generated]
+    B --> C[Under Review]
+    C --> D[Approved]
+    D --> E[Posted]
+    E --> F[Paid]
 ```
 
 Each stage has a different purpose.
@@ -213,22 +201,14 @@ The associated payout has been marked as paid.
 
 The statement workflow allows these transitions:
 
-```text
-Generated
-    ↓
-Under Review
-
-Under Review
-    ├──→ Approved
-    └──→ Cancelled
-
-Approved
-    ├──→ Posted
-    └──→ Cancelled
-
-Posted
-    ↓
-Paid
+```mermaid
+flowchart TD
+    A[Generated] --> B[Under Review]
+    B --> C[Approved]
+    B --> D[Cancelled]
+    C --> E[Posted]
+    C --> D
+    E --> F[Paid]
 ```
 
 A statement cannot arbitrarily jump between states.
@@ -243,18 +223,13 @@ The statement workflow deliberately separates calculation from approval.
 
 The commission is calculated before the statement reaches the review stage:
 
-```text
-Sales Invoice
-      ↓
-Commission Calculation
-      ↓
-Commission Ledger
-      ↓
-Commission Statement
-      ↓
-Review
-      ↓
-Approval
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Commission Calculation]
+    B --> C[Commission Ledger]
+    C --> D[Commission Statement]
+    D --> E[Review]
+    E --> F[Approval]
 ```
 
 This means reviewers are approving a stored commission snapshot rather than triggering a new calculation.
@@ -313,10 +288,9 @@ This prevents the same commission from being included in multiple active stateme
 
 For example:
 
-```text
-Ledger Entry A
-      ↓
-Statement 1
+```mermaid
+flowchart LR
+    A[Ledger Entry A] --> B[Statement 1]
 ```
 
 After Statement 1 has captured the entry, another statement for the same payee and period will not include that entry again while Statement 1 remains non-cancelled.
@@ -347,14 +321,9 @@ The payout amount is based on the statement's net commission.
 
 For example:
 
-```text
-Statement
-Net Commission = ₹1,500
-
-        ↓
-
-Commission Payout
-Amount = ₹1,500
+```mermaid
+flowchart TD
+    A["Statement: Net Commission = ₹1,500"] --> B["Commission Payout: Amount = ₹1,500"]
 ```
 
 The statement therefore represents the approved commission amount, while the payout represents the actual payment process.
@@ -364,9 +333,9 @@ The statement therefore represents the approved commission amount, while the pay
 Suppose a salesperson has the following eligible ledger entries during October:
 
 ```text
-Invoice A → ₹500
-Invoice B → ₹750
-Invoice C → ₹250
+Invoice A -> ₹500
+Invoice B -> ₹750
+Invoice C -> ₹250
 ```
 
 Create a statement:
@@ -390,14 +359,11 @@ Status           = Generated
 
 The statement can then move through:
 
-```text
-Generated
-    ↓
-Under Review
-    ↓
-Approved
-    ↓
-Posted
+```mermaid
+flowchart TD
+    A[Generated] --> B[Under Review]
+    B --> C[Approved]
+    C --> D[Posted]
 ```
 
 A payout can then be created for:

@@ -1,3 +1,5 @@
+<!-- File: payees.md -->
+
 # Configure Commission Payees
 
 This guide explains how to configure Commission Payees in the Incentive Compensation Engine.
@@ -21,7 +23,7 @@ You should also understand which sales entity will appear on the relevant ERPNex
 
 Open:
 
-**Commission Payee → New**
+**Commission Payee -> New**
 
 Configure:
 
@@ -71,7 +73,7 @@ Configure:
 
 ```text
 Payee Type: Employee
-Sales Person: <ERPNext Sales Person>
+Sales Person: <ERPNext Person Sales>
 ```
 
 For example:
@@ -93,7 +95,7 @@ Configure:
 
 ```text
 Payee Type: Sales Partner
-Sales Partner: <ERPNext Sales Partner>
+Sales Partner: <ERPNext Partner Sales>
 ```
 
 For example:
@@ -113,12 +115,10 @@ The Commission Payee provides a single commission-specific representation of the
 
 The commission engine can therefore work with:
 
-```text
-Commission Payee
-      │
-      ├── Sales Person
-      │
-      └── Sales Partner
+```mermaid
+flowchart TD
+    A[Commission Payee] --> B[Sales Person]
+    A --> C[Sales Partner]
 ```
 
 This keeps commission records consistent regardless of which ERPNext entity represents the recipient.
@@ -129,27 +129,20 @@ For Sales Invoice-based commissions, Sales Team information is important when re
 
 A simplified relationship is:
 
-```text
-Sales Invoice
-      ↓
-Sales Team
-      ↓
-Sales Person
-      ↓
-Commission Payee
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Sales Team]
+    B --> C[Sales Person]
+    C --> D[Commission Payee]
 ```
 
 For example:
 
-```text
-Sales Invoice
-│
-└── Sales Team
-      │
-      └── John Doe → 100%
-                    │
-                    ▼
-             John Doe Commission
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Sales Team]
+    B --> C["John Doe -> 100%"]
+    C --> D[John Doe Commission]
 ```
 
 The transaction builder uses Sales Team contribution when constructing commission calculation inputs.
@@ -161,8 +154,8 @@ A Sales Invoice can contain one or more Sales Team members.
 For example:
 
 ```text
-Sales Person A → 60%
-Sales Person B → 40%
+Sales Person A -> 60%
+Sales Person B -> 40%
 ```
 
 The contribution percentages can be used to allocate the applicable commission between the Sales Team members.
@@ -170,8 +163,8 @@ The contribution percentages can be used to allocate the applicable commission b
 For a ₹1,000 commission:
 
 ```text
-Sales Person A → ₹600
-Sales Person B → ₹400
+Sales Person A -> ₹600
+Sales Person B -> ₹400
 ```
 
 The Commission Payee identifies the recipient associated with the relevant Sales Person.
@@ -205,12 +198,10 @@ Use **Sales Partner** when the recipient is connected through an ERPNext Sales P
 
 The important distinction is:
 
-```text
-Payee Type
-     ↓
-Underlying ERPNext Entity
-     ↓
-Commission Recipient
+```mermaid
+flowchart TD
+    A[Payee Type] --> B[Underlying ERPNext Entity]
+    B --> C[Commission Recipient]
 ```
 
 Choose the type that matches the way the recipient is represented in ERPNext.
@@ -232,7 +223,7 @@ On the relevant Sales Invoice, include:
 
 ```text
 Sales Team
-    Test Salesperson → 100%
+    Test Salesperson -> 100%
 ```
 
 When the invoice is submitted and the commission configuration matches, the commission engine can resolve the Commission Payee associated with that Sales Person.
@@ -258,14 +249,11 @@ When a commission is calculated, the resolved Commission Payee is stored on the 
 
 For example:
 
-```text
-Sales Invoice
-      ↓
-Commission Calculation
-      ↓
-Commission Payee: Test Salesperson
-      ↓
-Commission Ledger
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Commission Calculation]
+    B --> C["Commission Payee: Test Salesperson"]
+    C --> D[Commission Ledger]
 ```
 
 This preserves who was identified as the recipient when the commission was calculated.
@@ -286,12 +274,10 @@ This preserves the payee record for historical references.
 
 The general approach is:
 
-```text
-Active Payee
-     ↓
-No longer active
-     ↓
-Enabled = No
+```mermaid
+flowchart TD
+    A[Active Payee] --> B[No longer active]
+    B --> C["Enabled = No"]
 ```
 
 rather than removing the historical identity from the system.
@@ -346,16 +332,12 @@ For employee-based commissions, make sure the relevant Sales Person is present i
 
 When setting up a new employee payee, verify:
 
-```text
-Sales Person
-      ↓
-Commission Payee
-      ↓
-Sales Invoice Sales Team
-      ↓
-Commission Rule
-      ↓
-Commission Ledger
+```mermaid
+flowchart TD
+    A[Sales Person] --> B[Commission Payee]
+    B --> C[Sales Invoice Sales Team]
+    C --> D[Commission Rule]
+    D --> E[Commission Ledger]
 ```
 
 This makes it easier to identify configuration problems before processing real commissions.

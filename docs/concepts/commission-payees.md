@@ -1,3 +1,5 @@
+<!-- File: commission-payees.md -->
+
 # Commission Payees
 
 A Commission Payee represents the person or partner who receives a commission.
@@ -17,12 +19,10 @@ The purpose of the Commission Payee is to give the commission engine a single co
 
 Instead of making every part of the commission system understand different recipient types, the engine works with:
 
-```text
-Commission Payee
-      │
-      ├── Employee / Sales Person
-      │
-      └── Sales Partner
+```mermaid
+flowchart TD
+    A[Commission Payee] --> B[Employee / Sales Person]
+    A --> C[Sales Partner]
 ```
 
 This keeps commission records consistent while still allowing the recipient to originate from different ERPNext entities.
@@ -51,7 +51,7 @@ Configure:
 
 ```text
 Payee Type: Employee
-Sales Person: <ERPNext Sales Person>
+Sales Person: <ERPNext Person Sales>
 ```
 
 The Sales Person is the ERPNext sales entity used when the commission engine processes the Sales Invoice.
@@ -64,7 +64,7 @@ Configure:
 
 ```text
 Payee Type: Sales Partner
-Sales Partner: <ERPNext Sales Partner>
+Sales Partner: <ERPNext Partner Sales>
 ```
 
 ## Creating a Commission Payee
@@ -90,15 +90,11 @@ For Sales Invoice-based commissions, the Sales Person associated with a Commissi
 
 For example:
 
-```text
-Sales Invoice
-      │
-      └── Sales Team
-             │
-             └── Sales Person
-                    │
-                    ▼
-             Commission Payee
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Sales Team]
+    B --> C[Sales Person]
+    C --> D[Commission Payee]
 ```
 
 The transaction builder uses the Sales Team information to determine the sales person's contribution to the invoice.
@@ -146,16 +142,12 @@ Enabled: Yes
 
 When a matching Sales Invoice is submitted:
 
-```text
-Sales Invoice
-      ↓
-Sales Team → John Doe
-      ↓
-Commission Payee → John Doe Commission
-      ↓
-Commission Calculation
-      ↓
-Commission Ledger
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Sales Team -> John Doe]
+    B --> C[Commission Payee -> John Doe Commission]
+    C --> D[Commission Calculation]
+    D --> E[Commission Ledger]
 ```
 
 The resulting ledger entry records the Commission Payee associated with the calculated commission.

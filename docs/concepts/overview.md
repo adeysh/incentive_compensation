@@ -8,51 +8,37 @@ This separation keeps the commission lifecycle understandable and makes historic
 
 At a high level:
 
-```text
-Commission Plan
-       │
-       ▼
-Commission Rule
-       │
-       ▼
-Commission Payee
-       │
-       │
-       ▼
-ERPNext Sales Invoice
-       │
-       ▼
-Commission Engine
-       │
-       ├── Resolve applicable plan
-       ├── Match commission rule
-       ├── Resolve commission payee
-       └── Calculate commission
-               │
-               ▼
-       Commission Ledger
-               │
-               ▼
-       Commission Statement
-               │
-       ┌───────┴────────┐
-       ▼                ▼
- Under Review       Cancelled
-       │
-       ▼
-   Approved
-       │
-       ▼
-    Posted
-       │
-       ▼
- Commission Payout
-       │
-       ▼
-   Processing
-       │
-       ▼
-      Paid
+```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 10, 'bottom': 15}, 'padding': 20}}}%%
+flowchart TD
+    %% Setup & Trigger
+    A[Commission Plan] --> B[Commission Rule]
+    B --> C[Commission Payee]
+    C --> D[ERPNext Sales Invoice]
+    D --> E[Commission Engine]
+
+    %% Commission Engine Internal Steps
+    subgraph Engine_Steps [Commission Engine Process]
+        direction TB
+        E1[Resolve applicable plan] --> E2[Match commission rule]
+        E2 --> E3[Resolve commission payee]
+        E3 --> E4[Calculate commission]
+    end
+
+    E --> E1
+    E4 --> F[Commission Ledger]
+
+    %% Statement & Approval Workflow
+    F --> G[Commission Statement]
+    G --> H(Under Review)
+    G --> I(Cancelled)
+    H --> J(Approved)
+    J --> K(Posted)
+
+    %% Payout Workflow
+    K --> L[Commission Payout]
+    L --> M(Processing)
+    M --> N(Paid)
 ```
 
 There are two important parts to this lifecycle:
@@ -197,12 +183,10 @@ A payout contains information such as:
 
 A payout progresses through:
 
-```text
-Pending
-   ↓
-Processing
-   ↓
-Paid
+```mermaid
+flowchart LR
+    A(Pending) --> B(Processing)
+    B --> C(Paid)
 ```
 
 Failed payouts can be returned to processing, while pending or processing payouts can be cancelled where permitted.
@@ -215,29 +199,15 @@ The calculation path begins with an ERPNext Sales Invoice.
 
 When the invoice is submitted, the commission event handler starts the commission calculation flow.
 
-```text
-Sales Invoice Submitted
-          │
-          ▼
-Transaction Builder
-          │
-          ▼
-Sales Team Allocation
-          │
-          ▼
-Plan Resolution
-          │
-          ▼
-Rule Matching
-          │
-          ▼
-Payee Resolution
-          │
-          ▼
-Commission Calculation
-          │
-          ▼
-Ledger Entry
+```mermaid
+flowchart TD
+    A[Sales Invoice Submitted] --> B[Transaction Builder]
+    B --> C[Sales Team Allocation]
+    C --> D[Plan Resolution]
+    D --> E[Rule Matching]
+    E --> F[Payee Resolution]
+    F --> G[Commission Calculation]
+    G --> H[Ledger Entry]
 ```
 
 ### Sales Team Allocation
@@ -273,18 +243,15 @@ The relevant conditions include:
 
 When multiple active plans are applicable, the engine selects the one with the most recent `Valid From` date.
 
-```text
-Eligible Plans
-      │
-      ├── Company matches
-      ├── Date is within validity
-      └── Status is Active
-              │
-              ▼
-      Most recent Valid From
-              │
-              ▼
-       Selected Plan
+```mermaid
+flowchart TD
+    A[Eligible Plans] --> B1[Company matches]
+    A --> B2[Date is within validity]
+    A --> B3[Status is Active]
+    B1 --> C[Most recent Valid From]
+    B2 --> C
+    B3 --> C
+    C --> D[Selected Plan]
 ```
 
 Only rules belonging to the selected plan are then considered.
@@ -304,17 +271,11 @@ A rule can apply to a particular:
 
 If multiple rules match, priority determines which rule is selected.
 
-```text
-Selected Plan
-      │
-      ▼
-Matching Rules
-      │
-      ▼
-Priority
-      │
-      ▼
-Selected Rule
+```mermaid
+flowchart TD
+    A[Selected Plan] --> B[Matching Rules]
+    B --> C[Priority]
+    C --> D[Selected Rule]
 ```
 
 This keeps plan selection and rule selection as two separate decisions.
@@ -361,16 +322,11 @@ Each generated commission has a unique source key.
 
 This provides idempotency:
 
-```text
-Same source transaction
-        +
-Same commission context
-        ↓
-Existing source key?
-   ┌────┴────┐
-  Yes        No
-   │          │
-Skip       Create
+```mermaid
+flowchart TD
+    A[Same source transaction + Same commission context] --> B{Existing source key?}
+    B -->|Yes| C[Skip]
+    B -->|No| D[Create]
 ```
 
 This prevents duplicate commission entries when the same event is processed more than once.
@@ -381,14 +337,9 @@ Cancelling a submitted Sales Invoice does not modify the original commission led
 
 Instead, the system creates a reversal entry.
 
-```text
-Original Commission
-       ₹500
-         │
-         │ Invoice Cancelled
-         ▼
-Reversal Commission
-      -₹500
+```mermaid
+flowchart TD
+    A[Original Commission<br/>₹500] -->|Invoice Cancelled| B[Reversal Commission<br/>-₹500]
 ```
 
 The original entry remains available as part of the audit history.
@@ -413,49 +364,26 @@ Entries that have already been included in another non-cancelled statement are e
 
 This means the ledger remains the calculation record while the statement becomes the settlement snapshot.
 
-```text
-Commission Ledger
-       │
-       ├── Already in active statement → Exclude
-       │
-       └── Eligible and unstated       → Include
-                                      │
-                                      ▼
-                             Commission Statement
+```mermaid
+flowchart TD
+    A[Commission Ledger] -->|Already in active statement| B[Exclude]
+    A -->|Eligible and unstated| C[Include]
+    C --> D[Commission Statement]
 ```
 
 ## Statement and Payout Lifecycle
 
 Once a statement has been generated, it moves through the review lifecycle:
 
-```text
-Draft
-  │
-  │ Generate
-  ▼
-Generated
-  │
-  │ Submit for Review
-  ▼
-Under Review
-  │
-  │ Approve
-  ▼
-Approved
-  │
-  │ Post
-  ▼
-Posted
-  │
-  │ Create Payout
-  ▼
-Commission Payout
-  │
-  ▼
-Processing
-  │
-  ▼
-Paid
+```mermaid
+flowchart TD
+    A(Draft) -->|Generate| B(Generated)
+    B -->|Submit for Review| C(Under Review)
+    C -->|Approve| D(Approved)
+    D -->|Post| E(Posted)
+    E -->|Create Payout| F[Commission Payout]
+    F --> G(Processing)
+    G --> H(Paid)
 ```
 
 The statement and payout workflows intentionally separate:

@@ -1,3 +1,5 @@
+<!-- File: reversals.md -->
+
 # Reversals
 
 A commission reversal records the effect of cancelling a Sales Invoice that previously generated commission.
@@ -23,8 +25,8 @@ If the Sales Invoice is later cancelled, the system needs to reflect that the �
 Rather than changing the original entry, the system creates:
 
 ```text
-Original Commission → +₹500
-Reversal            → -₹500
+Original Commission -> +₹500
+Reversal            -> -₹500
 ```
 
 The net effect is:
@@ -39,16 +41,12 @@ The original calculation remains visible in the audit trail.
 
 The basic process is:
 
-```text
-Sales Invoice Submitted
-        ↓
-Commission Calculated
-        ↓
-Commission Ledger
-        ↓
-Sales Invoice Cancelled
-        ↓
-Reversal Ledger Entry
+```mermaid
+flowchart TD
+    A[Sales Invoice Submitted] --> B[Commission Calculated]
+    B --> C[Commission Ledger]
+    C --> D[Sales Invoice Cancelled]
+    D --> E[Reversal Ledger Entry]
 ```
 
 The reversal is automatically generated when the source Sales Invoice is cancelled.
@@ -76,15 +74,11 @@ The application identifies the commission entries associated with the source inv
 
 Conceptually:
 
-```text
-Sales Invoice
-      │
-      ├── Original Commission → +₹500
-      │
-      └── Cancellation
-               │
-               ▼
-          Reversal → -₹500
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B["Original Commission -> +₹500"]
+    A --> C[Cancellation]
+    C --> D["Reversal -> -₹500"]
 ```
 
 The original ledger entry is not overwritten.
@@ -141,12 +135,10 @@ If the original entry were simply edited or deleted, the system would lose infor
 
 The ledger therefore behaves like an event history:
 
-```text
-Original Event
-      +
-Reversal Event
-      =
-Complete History
+```mermaid
+flowchart LR
+    A[Original Event] --> C[Complete History]
+    B[Reversal Event] --> C
 ```
 
 ## Reversal Amount
@@ -176,18 +168,13 @@ The reversal source key identifies the source transaction, item, payee, rule, an
 
 Conceptually:
 
-```text
-Sales Invoice
-      +
-Sales Invoice Item
-      +
-Commission Payee
-      +
-Commission Rule
-      +
-REVERSAL
-      ↓
-Reversal Source Key
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> F[Reversal Source Key]
+    B[Sales Invoice Item] --> F
+    C[Commission Payee] --> F
+    D[Commission Rule] --> F
+    E[REVERSAL] --> F
 ```
 
 This prevents the same cancellation event from creating duplicate reversal entries if the reversal processing is triggered more than once.
@@ -202,25 +189,20 @@ When the invoice is cancelled, the application reverses the relevant commission 
 
 For example:
 
-```text
-Invoice
-│
-├── Item A → Commission +₹500
-└── Item B → Commission +₹300
+```mermaid
+flowchart TD
+    A[Invoice] --> B["Item A -> Commission +₹500"]
+    A --> C["Item B -> Commission +₹300"]
 ```
 
 After cancellation:
 
-```text
-Original Entries
-│
-├── Item A → +₹500
-└── Item B → +₹300
-
-Reversals
-│
-├── Item A → -₹500
-└── Item B → -₹300
+```mermaid
+flowchart TD
+    A[Original Entries] --> B["Item A -> +₹500"]
+    A --> C["Item B -> +₹300"]
+    D[Reversals] --> E["Item A -> -₹500"]
+    D --> F["Item B -> -₹300"]
 ```
 
 The total historical effect becomes:
@@ -241,16 +223,10 @@ The reversal is created as a new historical record.
 
 Both entries are preserved.
 
-```text
-Original Ledger Entry
-        │
-        │ immutable
-        ▼
-Reversal Ledger Entry
-        │
-        │ immutable
-        ▼
-Historical Audit Trail
+```mermaid
+flowchart TD
+    A[Original Ledger Entry] -->|immutable| B[Reversal Ledger Entry]
+    B -->|immutable| C[Historical Audit Trail]
 ```
 
 This means the ledger can be examined later to understand both the original calculation and the subsequent cancellation.
@@ -264,8 +240,8 @@ This means reversal entries can affect the commission represented by ledger data
 For example:
 
 ```text
-Original Commission → +₹500
-Reversal            → -₹500
+Original Commission -> +₹500
+Reversal            -> -₹500
 ```
 
 Together they represent no remaining commission effect from the cancelled transaction.
@@ -327,8 +303,8 @@ Reversal Of:         CL-2026-00001
 The ledger history is now:
 
 ```text
-CL-2026-00001 → +₹500 → Original Commission
-CL-2026-00002 → -₹500 → Reversal
+CL-2026-00001 -> +₹500 -> Original Commission
+CL-2026-00002 -> -₹500 -> Reversal
 ```
 
 Net effect:
@@ -387,26 +363,17 @@ When a reversal appears to be missing from a statement, check the reversal's tra
 
 The complete process is:
 
-```text
-ERPNext Sales Invoice
-        ↓
-Submitted
-        ↓
-Commission Calculated
-        ↓
-Commission Ledger
-        │
-        │ Original Entry
-        ▼
-Sales Invoice Cancelled
-        ↓
-Reversal Processing
-        ↓
-Reversal Ledger Entry
-        │
-        ├── Entry Type: Reversal
-        ├── Negative Commission Amount
-        └── Reversal Of → Original Entry
+```mermaid
+flowchart TD
+    A[ERPNext Sales Invoice] --> B[Submitted]
+    B --> C[Commission Calculated]
+    C --> D[Commission Ledger]
+    D -->|Original Entry| E[Sales Invoice Cancelled]
+    E --> F[Reversal Processing]
+    F --> G[Reversal Ledger Entry]
+    G --> H["Entry Type: Reversal"]
+    G --> I[Negative Commission Amount]
+    G --> J["Reversal Of -> Original Entry"]
 ```
 
 The result is an immutable history of both the commission and its reversal.

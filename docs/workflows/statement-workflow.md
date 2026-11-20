@@ -1,3 +1,5 @@
+<!-- File: statement-workflow.md -->
+
 # Statement Workflow
 
 A Commission Statement moves through a controlled workflow from the initial Draft configuration to final payment.
@@ -8,18 +10,13 @@ The workflow separates statement creation and calculation from review, approval,
 
 The normal statement lifecycle is:
 
-```text
-Draft
-  ↓
-Generated
-  ↓
-Under Review
-  ↓
-Approved
-  ↓
-Posted
-  ↓
-Paid
+```mermaid
+flowchart TD
+    A[Draft] --> B[Generated]
+    B --> C[Under Review]
+    C --> D[Approved]
+    D --> E[Posted]
+    E --> F[Paid]
 ```
 
 The application also supports cancellation from the appropriate workflow stages.
@@ -67,16 +64,12 @@ When **Generate Statement** is executed, the application:
 
 Conceptually:
 
-```text
-Draft Statement
-      ↓
-Generate Statement
-      ↓
-Eligible Ledger Entries
-      ↓
-Statement Snapshot
-      ↓
-Generated
+```mermaid
+flowchart TD
+    A[Draft Statement] --> B[Generate Statement]
+    B --> C[Eligible Ledger Entries]
+    C --> D[Statement Snapshot]
+    D --> E[Generated]
 ```
 
 Generation is not the same as submitting the statement for review.
@@ -99,10 +92,9 @@ At this point, the statement is ready to be reviewed.
 
 The next workflow transition is:
 
-```text
-Generated
-    ↓
-Under Review
+```mermaid
+flowchart TD
+    A[Generated] --> B[Under Review]
 ```
 
 ## Under Review
@@ -122,10 +114,10 @@ The statement should be checked for correctness before it is approved.
 
 The allowed transitions from Under Review are:
 
-```text
-Under Review
-    ├──→ Approved
-    └──→ Cancelled
+```mermaid
+flowchart TD
+    A[Under Review] --> B[Approved]
+    A --> C[Cancelled]
 ```
 
 ## Approved
@@ -136,10 +128,10 @@ The approved commission amount is ready to be finalized.
 
 The allowed transitions are:
 
-```text
-Approved
-    ├──→ Posted
-    └──→ Cancelled
+```mermaid
+flowchart TD
+    A[Approved] --> B[Posted]
+    A --> C[Cancelled]
 ```
 
 Posting finalizes the statement for payout processing.
@@ -150,10 +142,9 @@ A Posted statement is finalized and can be used to create a Commission Payout.
 
 The normal next step is:
 
-```text
-Posted
-   ↓
-Create Payout
+```mermaid
+flowchart TD
+    A[Posted] --> B[Create Payout]
 ```
 
 The statement itself then remains Posted until its associated payout is marked Paid.
@@ -166,10 +157,9 @@ Paid
 
 The direct statement transition is therefore:
 
-```text
-Posted
-   ↓
-Paid
+```mermaid
+flowchart TD
+    A[Posted] --> B[Paid]
 ```
 
 ## Paid
@@ -180,14 +170,11 @@ It indicates that the associated Commission Payout has been marked Paid.
 
 The relationship is:
 
-```text
-Commission Statement
-        │
-        └── Commission Payout
-                    │
-                    └── Paid
-                         ↓
-                    Statement Paid
+```mermaid
+flowchart TD
+    A[Commission Statement] --> B[Commission Payout]
+    B --> C[Paid]
+    C --> D[Statement Paid]
 ```
 
 The statement does not independently process the payment.
@@ -200,14 +187,10 @@ Cancellation is available from the workflow stages where the statement has not y
 
 The supported cancellation paths are:
 
-```text
-Under Review
-      ↓
-  Cancelled
-
-Approved
-      ↓
-  Cancelled
+```mermaid
+flowchart TD
+    A[Under Review] --> C[Cancelled]
+    B[Approved] --> C
 ```
 
 A cancelled statement does not continue through the normal approval and payout process.
@@ -216,51 +199,16 @@ A cancelled statement does not continue through the normal approval and payout p
 
 The statement workflow can be represented as:
 
-```text
-                         ┌─────────────┐
-                         │    Draft    │
-                         └──────┬──────┘
-                                │
-                         Generate Statement
-                                │
-                                ▼
-                       ┌────────────────┐
-                       │   Generated   │
-                       └───────┬────────┘
-                               │
-                         Submit for Review
-                               │
-                               ▼
-                       ┌────────────────┐
-                       │  Under Review │
-                       └───────┬────────┘
-                          ┌────┴────┐
-                          │         │
-                       Approve   Cancel
-                          │         │
-                          ▼         ▼
-                  ┌─────────────┐  Cancelled
-                  │   Approved  │
-                  └──────┬──────┘
-                     ┌───┴───┐
-                  Post    Cancel
-                     │       │
-                     ▼       ▼
-               ┌──────────┐ Cancelled
-               │  Posted  │
-               └────┬─────┘
-                    │
-              Create Payout
-                    │
-                    ▼
-             Commission Payout
-                    │
-                  Paid
-                    │
-                    ▼
-               ┌────────┐
-               │  Paid  │
-               └────────┘
+```mermaid
+flowchart TD
+    A[Draft] -->|Generate Statement| B[Generated]
+    B -->|Submit for Review| C[Under Review]
+    C -->|Approve| D[Approved]
+    C -->|Cancel| X[Cancelled]
+    D -->|Post| E[Posted]
+    D -->|Cancel| X
+    E -->|Create Payout| F[Commission Payout]
+    F -->|Paid| G[Paid]
 ```
 
 ## Allowed Workflow Transitions
@@ -275,7 +223,7 @@ The application defines the following statement transitions:
 | Approved       | Posted, Cancelled                  |
 | Posted         | Paid                               |
 
-The Draft → Generated operation is deliberately handled by statement generation rather than the normal workflow transition mechanism.
+The Draft -> Generated operation is deliberately handled by statement generation rather than the normal workflow transition mechanism.
 
 This distinction keeps **generation** separate from **review and approval**.
 
@@ -295,20 +243,17 @@ Therefore, generation is a business operation rather than a simple status change
 
 The application treats:
 
-```text
-Draft
-   ↓
-Generate Statement
-   ↓
-Generated
+```mermaid
+flowchart TD
+    A[Draft] --> B[Generate Statement]
+    B --> C[Generated]
 ```
 
 differently from:
 
-```text
-Generated
-   ↓
-Under Review
+```mermaid
+flowchart TD
+    A[Generated] --> B[Under Review]
 ```
 
 The first creates the statement's data snapshot.
@@ -338,20 +283,14 @@ This ensures that the statement being reviewed is the same statement that was ge
 
 A typical review process is:
 
-```text
-1. Generate statement
-          ↓
-2. Inspect totals
-          ↓
-3. Inspect ledger entries
-          ↓
-4. Verify source transactions
-          ↓
-5. Submit for review
-          ↓
-6. Approve
-          ↓
-7. Post
+```mermaid
+flowchart TD
+    A["1. Generate statement"] --> B["2. Inspect totals"]
+    B --> C["3. Inspect ledger entries"]
+    C --> D["4. Verify source transactions"]
+    D --> E["5. Submit for review"]
+    E --> F["6. Approve"]
+    F --> G["7. Post"]
 ```
 
 The reviewer should verify that the statement contains the expected commissions before approval.
@@ -362,14 +301,11 @@ Posting is the point at which the statement becomes eligible for payout processi
 
 The flow is:
 
-```text
-Approved
-   ↓
-Posted
-   ↓
-Create Payout
-   ↓
-Pending
+```mermaid
+flowchart TD
+    A[Approved] --> B[Posted]
+    B --> C[Create Payout]
+    C --> D[Pending]
 ```
 
 The payout then follows its own workflow.
@@ -392,53 +328,44 @@ Create a statement:
 
 ```text
 Status: Draft
-Period: 2026-10-01 → 2026-10-31
+Period: 2026-10-01 -> 2026-10-31
 ```
 
 Generate it:
 
-```text
-Draft
-  ↓
-Generated
-
-Net Commission: ₹5,000
+```mermaid
+flowchart TD
+    A["Draft (Net Commission: ₹5,000)"] --> B[Generated]
 ```
 
 Submit it for review:
 
-```text
-Generated
-  ↓
-Under Review
+```mermaid
+flowchart TD
+    A[Generated] --> B[Under Review]
 ```
 
 Approve it:
 
-```text
-Under Review
-  ↓
-Approved
+```mermaid
+flowchart TD
+    A[Under Review] --> B[Approved]
 ```
 
 Post it:
 
-```text
-Approved
-  ↓
-Posted
+```mermaid
+flowchart TD
+    A[Approved] --> B[Posted]
 ```
 
 Create and pay the payout:
 
-```text
-Posted Statement
-      ↓
-Commission Payout
-      ↓
-Processing
-      ↓
-Paid
+```mermaid
+flowchart TD
+    A[Posted Statement] --> B[Commission Payout]
+    B --> C[Processing]
+    C --> D[Paid]
 ```
 
 The statement then becomes:

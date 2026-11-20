@@ -13,16 +13,12 @@ A Commission Rule answers two questions:
 
 A rule combines matching conditions with a calculation method.
 
-```text
-Commission Plan
-       │
-       ├── Commission Rule
-       │       │
-       │       ├── Matching Conditions
-       │       │
-       │       └── Calculation Method
-       │
-       └── Commission Rule
+```mermaid
+flowchart LR
+    A[Commission Plan] --> B[Commission Rule]
+    B --> B1[Matching Conditions]
+    B --> B2[Calculation Method]
+    A --> C[Commission Rule]
 ```
 
 ## Fields
@@ -275,20 +271,14 @@ When a Sales Invoice is submitted, the commission engine evaluates the applicabl
 
 Conceptually, the process is:
 
-```text
-Sales Invoice
-      ↓
-Find applicable Commission Plan
-      ↓
-Find enabled matching Commission Rules
-      ↓
-Evaluate rule priority
-      ↓
-Select applicable Rule
-      ↓
-Calculate Commission
-      ↓
-Create Commission Ledger Entry
+```mermaid
+flowchart TD
+    A[Sales Invoice] --> B[Find applicable Commission Plan]
+    B --> C[Find enabled matching Commission Rules]
+    C --> D[Evaluate rule priority]
+    D --> E[Select applicable Rule]
+    E --> F[Calculate Commission]
+    F --> G[Create Commission Ledger Entry]
 ```
 
 The rule does not operate independently of the plan. The plan establishes the configuration context first, and rules are evaluated within that plan.
@@ -358,14 +348,9 @@ Changing a Commission Rule does not modify previously calculated Commission Ledg
 
 For example, suppose a rule changes from:
 
-```text
-Rate: 5%
-```
-
-to:
-
-```text
-Rate: 7%
+```mermaid
+flowchart LR
+    A[Rate: 5%] -->|Updated to| B[Rate: 7%]
 ```
 
 A commission that was already calculated at 5% remains recorded at 5%.
