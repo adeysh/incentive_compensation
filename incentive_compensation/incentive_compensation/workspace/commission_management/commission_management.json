@@ -1,0 +1,115 @@
+{
+ "app": "erpnext",
+ "charts": [
+  {
+   "chart_name": "Commission Trend",
+   "label": "Commission Trend"
+  },
+  {
+   "chart_name": "Commission by Rule",
+   "label": "Commission by Rule"
+  },
+  {
+   "chart_name": "Commission by Payee",
+   "label": "Commission by Payee"
+  },
+  {
+   "chart_name": "Commission by Plan",
+   "label": "Commission by Plan"
+  }
+ ],
+ "content": "[{\"id\":\"LGoA2Lb7vh\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Commission Overview</span>\",\"col\":12}},{\"id\":\"Kx0aJ_S2fa\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Net Commission\",\"col\":3}},{\"id\":\"3kUbrc06NG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Gross Commission\",\"col\":3}},{\"id\":\"R0NHCcWLpc\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Adjustments\",\"col\":3}},{\"id\":\"O1gXF_TY4-\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pending Payout\",\"col\":3}},{\"id\":\"cn5Ri1pmZq\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Commission Trend\",\"col\":12}},{\"id\":\"a7LypN1vvC\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Commission by Payee\",\"col\":6}},{\"id\":\"dZHc4oUCIu\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Commission by Plan\",\"col\":6}},{\"id\":\"dsFcl-tUlo\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Commission by Rule\",\"col\":12}},{\"id\":\"SzT6CQfQdQ\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Commission Operations<b></b></span>\",\"col\":12}},{\"id\":\"kM-2z34KEl\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Commission Plans\",\"col\":4}},{\"id\":\"numxKMcPI_\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Commission Rules\",\"col\":4}},{\"id\":\"Db0JlzWe9Z\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Commission Payees\",\"col\":4}},{\"id\":\"72WbYL1BCc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Commission Ledger\",\"col\":4}},{\"id\":\"00tVGwYvzN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Statements\",\"col\":4}},{\"id\":\"mSQMh-jHUR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payouts\",\"col\":4}}]",
+ "creation": "2026-09-28 12:53:06.507365",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "hand-coins",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Commission Management",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-11-23 02:15:22.629547",
+ "modified_by": "Administrator",
+ "module": "Incentive Compensation",
+ "name": "Commission Management",
+ "number_cards": [
+  {
+   "label": "Net Commission",
+   "number_card_name": "Net Commission"
+  },
+  {
+   "label": "Gross Commission",
+   "number_card_name": "Gross Commission"
+  },
+  {
+   "label": "Adjustments",
+   "number_card_name": "Adjustments"
+  },
+  {
+   "label": "Pending Payout",
+   "number_card_name": "Pending Payout"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 23.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Commission Plans",
+   "link_to": "Commission Plan",
+   "stats_filter": "[[\"Commission Plan\",\"status\",\"=\",\"Active\"]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Commission Rules",
+   "link_to": "Commission Rule",
+   "stats_filter": "[[\"Commission Rule\",\"enabled\",\"=\",1]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Commission Payees",
+   "link_to": "Commission Payee",
+   "stats_filter": "[[\"Commission Payee\",\"enabled\",\"=\",1]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Commission Ledger",
+   "link_to": "Commission Ledger",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Statements",
+   "link_to": "Commission Statement",
+   "stats_filter": "[[\"Commission Statement\",\"status\",\"!=\",\"Cancelled\"]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Payouts",
+   "link_to": "Commission Payout",
+   "stats_filter": "[[\"Commission Payout\",\"status\",\"!=\",\"Cancelled\"]]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Commission Management",
+ "type": "Workspace"
+}
