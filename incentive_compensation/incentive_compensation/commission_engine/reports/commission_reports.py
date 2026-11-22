@@ -77,7 +77,39 @@ def _get_ledger_entries(
     if company:
         filters["company"] = company
 
-    if commission_payee:
+    roles = frappe.get_roles()
+
+    manager_roles = {
+        "System Manager",
+        "Commission Manager",
+        "Commission Payout Manager",
+    }
+
+    # Commission Users must only see their own commission records.
+    if "Commission User" in roles and not manager_roles.intersection(roles):
+        payees = frappe.get_all(
+            "Commission Payee",
+            filters={
+                "user": frappe.session.user,
+                "enabled": 1,
+            },
+            pluck="name",
+            limit_page_length=2,
+        )
+
+        # Fail closed if the user has no mapping or multiple mappings.
+        if len(payees) != 1:
+            return []
+
+        own_payee = payees[0]
+
+        # Prevent users from requesting another payee through filters.
+        if commission_payee and commission_payee != own_payee:
+            return []
+
+        filters["commission_payee"] = own_payee
+
+    elif commission_payee:
         filters["commission_payee"] = commission_payee
 
     if commission_plan:

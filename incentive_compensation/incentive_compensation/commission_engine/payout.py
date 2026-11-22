@@ -21,10 +21,15 @@ def create_commission_payout(statement):
             title="Statement Not Ready for Payout",
         )
 
-    if (statement.net_commission or 0) <= 0:
+    payable_amount = (
+        statement.payable_amount
+        if statement.payable_amount is not None
+        else statement.net_commission or 0
+    )
+
+    if payable_amount <= 0:
         frappe.throw(
-            "Cannot create a payout for a Commission Statement "
-            "with zero or negative net commission.",
+            "Cannot create a payout when the payable amount is zero or negative.",
             title="Invalid Payout Amount",
         )
 
@@ -53,7 +58,7 @@ def create_commission_payout(statement):
             "commission_payee": statement.commission_payee,
             "company": statement.company,
             "currency": statement.currency,
-            "amount": statement.net_commission,
+            "amount": payable_amount,
             "status": "Pending",
         }
     )

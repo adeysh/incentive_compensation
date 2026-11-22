@@ -13,6 +13,9 @@ IMMUTABLE_FIELDS = [
     "gross_commission",
     "adjustments",
     "net_commission",
+    "opening_balance",
+    "closing_balance",
+    "payable_amount",
     "generation_date",
 ]
 

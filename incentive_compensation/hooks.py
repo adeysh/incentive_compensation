@@ -143,13 +143,17 @@ fixtures = [
 # -----------
 # Permissions evaluated in scripted ways
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+permission_query_conditions = {
+    "Commission Ledger": "incentive_compensation.incentive_compensation.commission_engine.permissions.get_commission_record_query",
+    "Commission Statement": "incentive_compensation.incentive_compensation.commission_engine.permissions.get_commission_record_query",
+    "Commission Payout": "incentive_compensation.incentive_compensation.commission_engine.permissions.get_commission_record_query",
+}
+
+has_permission = {
+    "Commission Ledger": "incentive_compensation.incentive_compensation.commission_engine.permissions.has_commission_record_permission",
+    "Commission Statement": "incentive_compensation.incentive_compensation.commission_engine.permissions.has_commission_record_permission",
+    "Commission Payout": "incentive_compensation.incentive_compensation.commission_engine.permissions.has_commission_record_permission",
+}
 
 # Document Events
 # ---------------

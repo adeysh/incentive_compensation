@@ -1,7 +1,10 @@
 import frappe
 from frappe.utils import now_datetime
 
-from .statement_resolver import get_statement_ledger_entries
+from .statement_resolver import (
+    get_statement_ledger_entries,
+    get_statement_opening_balance,
+)
 from .permissions import require_role
 
 
@@ -60,6 +63,8 @@ def generate_statement(statement):
 
     statement.flags.generating = True
 
+    opening_balance = get_statement_opening_balance(statement)
+
     entries = get_statement_ledger_entries(
         statement.commission_payee,
         statement.company,
@@ -68,7 +73,9 @@ def generate_statement(statement):
         statement.to_date,
     )
 
-    if not entries:
+    # A statement can still be generated without new entries
+    # when it has a negative opening balance to carry forward.
+    if not entries and opening_balance >= 0:
         frappe.throw(
             "No eligible Commission Ledger entries found "
             "for the selected payee and date range.",
@@ -77,9 +84,18 @@ def generate_statement(statement):
 
     totals = calculate_statement_totals(entries)
 
+    net_commission = totals["net_commission"]
+    closing_balance = opening_balance + net_commission
+    payable_amount = max(0, closing_balance)
+
     statement.gross_commission = totals["gross_commission"]
     statement.adjustments = totals["adjustments"]
-    statement.net_commission = totals["net_commission"]
+    statement.net_commission = net_commission
+
+    statement.opening_balance = opening_balance
+    statement.closing_balance = closing_balance
+    statement.payable_amount = payable_amount
+
     statement.generation_date = now_datetime()
     statement.status = "Generated"
 

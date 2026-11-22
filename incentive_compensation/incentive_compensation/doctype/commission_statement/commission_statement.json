@@ -18,9 +18,12 @@
   "to_date",
   "commission_section",
   "gross_commission",
-  "net_commission",
-  "column_break_exhe",
   "adjustments",
+  "net_commission",
+  "opening_balance",
+  "column_break_exhe",
+  "closing_balance",
+  "payable_amount",
   "status_section",
   "status",
   "column_break_pove",
@@ -111,6 +114,25 @@
    "fieldname": "adjustments",
    "fieldtype": "Currency",
    "label": "Adjustments",
+   "read_only": 1
+  },
+  {
+   "fieldname": "opening_balance",
+   "fieldtype": "Currency",
+   "label": "Opening Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "closing_balance",
+   "fieldtype": "Currency",
+   "label": "Closing Balance",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "payable_amount",
+   "fieldtype": "Currency",
+   "label": "Payable Amount",
    "read_only": 1
   },
   {

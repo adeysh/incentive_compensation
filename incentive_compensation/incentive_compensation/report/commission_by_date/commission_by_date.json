@@ -12,7 +12,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": null,
- "modified": "2026-09-28 15:44:23.245147",
+ "modified": "2026-09-29 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Incentive Compensation",
  "name": "Commission by Date",
@@ -22,6 +22,9 @@
  "report_name": "Commission by Date",
  "report_type": "Script Report",
  "roles": [
+  {
+   "role": "Commission Manager"
+  },
   {
    "role": "System Manager"
   }
