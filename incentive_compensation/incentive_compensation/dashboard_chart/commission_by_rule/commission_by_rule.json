@@ -9,7 +9,7 @@
  "doctype": "Dashboard Chart",
  "document_type": "Commission Ledger",
  "dynamic_filters_json": "[]",
- "filters_json": "[[\"Commission Ledger\",\"company\",\"=\",\"Acme Electronics Pvt. Ltd. (Demo)\"]]",
+ "filters_json": "[]",
  "group_by_based_on": "commission_rule",
  "group_by_type": "Sum",
  "idx": 0,

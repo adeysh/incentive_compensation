@@ -17,7 +17,7 @@ add_to_apps_screen = [
         "name": "incentive_compensation",
         "logo": "/assets/incentive_compensation/images/logo.svg",
         "title": "Incentive Compensation",
-        "route": "/incentive_compensation",
+        "route": "/desk/commission-management",
     }
 ]
 
